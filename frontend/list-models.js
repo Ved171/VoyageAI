@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 async function listModels() {
-    const apiKey = process.env.VITE_GEMINI_API_KEY || "AIzaSyA8-Y8SEAFGBV7w-kz59-hMfII0qf6gfuA";
+    const apiKey = process.env.VITE_GEMINI_API_KEY;
     const ai = new GoogleGenAI({ apiKey });
     
     try {

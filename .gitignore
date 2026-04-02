@@ -38,3 +38,13 @@ backend/dist
 frontend/node_modules
 backend/node_modules
 /node_modules
+
+# Assistant related
+migrated_prompt_history/
+metadata.json
+
+# Vite
+.vite/
+
+# Uploads
+backend/uploads/
