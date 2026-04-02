@@ -61,7 +61,7 @@ router.post('/', async (req: AuthRequest, res) => {
       role: 'owner',
     });
 
-    res.status(201).json(savedItinerary);
+    res.status(201).json({ ...savedItinerary.toJSON(), memberRole: 'owner' });
   } catch (error: any) {
     console.error('Error saving itinerary:', error?.message || error);
     res.status(400).json({ message: 'Error saving itinerary', error: error?.message });

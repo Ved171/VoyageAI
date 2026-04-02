@@ -111,6 +111,7 @@ const App: React.FC = () => {
       if (finalItinerary.destination && finalItinerary.dailyPlans && finalItinerary.dailyPlans.length > 0) {
         try {
           const savedTrip = await apiService.saveItinerary(finalItinerary as Itinerary);
+          setItinerary(savedTrip);
           setSavedTrips(prev => {
             const updated = [savedTrip, ...prev.filter(t => t.destination !== savedTrip.destination)].slice(0, 5);
             return updated;
