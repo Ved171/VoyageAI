@@ -1,0 +1,225 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Manrope:wght@200..800&display=swap');
+@import "tailwindcss";
+
+:root {
+  /* Common Brand Colors */
+  --brand-primary: #ff9153;
+  --brand-secondary: #ff6f7d;
+  --brand-tertiary: #9bffce;
+  
+  /* Default: Dark Theme */
+  --bg-void: #020617;
+  --bg-gradient: linear-gradient(135deg, #020617 0%, #070d1f 50%, #0f172a 100%);
+  --text-main: #dfe4fe;
+  --text-muted: #94a3b8;
+  --surface-glass: rgba(15, 23, 42, 0.6);
+  --surface-border: rgba(255, 255, 255, 0.1);
+  --card-bg: rgba(30, 41, 59, 0.5);
+  --input-bg: rgba(15, 23, 42, 0.7);
+  --grid-color: rgba(255, 255, 255, 0.05);
+}
+
+.light {
+  /* Light Theme Overrides */
+  --bg-void: #f1f5f9;
+  --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  --text-main: #0f172a;
+  --text-muted: #64748b; /* Slate 500 */
+  --surface-glass: rgba(255, 255, 255, 0.7);
+  --surface-border: rgba(15, 23, 42, 0.08);
+  --card-bg: #ffffff;
+  --input-bg: rgba(255, 255, 255, 0.9);
+  --grid-color: rgba(15, 23, 42, 0.05);
+  --brand-tertiary: #059669;
+}
+
+@theme {
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-tertiary: var(--brand-tertiary);
+  --color-bg-void: var(--bg-void);
+  --color-bg-gradient: var(--bg-gradient);
+  --color-text-main: var(--text-main);
+  --color-text-muted: var(--text-muted);
+  --color-card-bg: var(--card-bg);
+  --color-input-bg: var(--input-bg);
+  --color-surface-border: var(--surface-border);
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }
+  @keyframes pulse-glow {
+    0% { box-shadow: 0 0 0 0 rgba(255, 145, 83, 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(255, 145, 83, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 145, 83, 0); }
+  }
+  @keyframes rotate-target {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes scan-line {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s infinite;
+}
+
+.animate-rotate-target {
+  animation: rotate-target 10s linear infinite;
+}
+
+.animate-scan {
+  animation: scan-line 4s linear infinite;
+}
+
+/* Base Styles */
+body {
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: 'Manrope', sans-serif;
+  overflow-x: hidden;
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+/* Global Interactive Cursors */
+button, 
+a, 
+select, 
+[role="button"], 
+input[type="submit"], 
+input[type="button"], 
+input[type="checkbox"], 
+input[type="radio"], 
+.clickable {
+  cursor: pointer !important;
+}
+
+button:disabled,
+input:disabled {
+  cursor: not-allowed !important;
+}
+
+.app-container {
+  background: transparent;
+  min-height: 100vh;
+  position: relative;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Glassmorphism Utilities */
+@utility glass-panel {
+  background: var(--surface-glass);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--surface-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+}
+
+.glass-card {
+  @apply glass-panel rounded-[32px] transition-all duration-500 overflow-hidden;
+}
+
+.glass-card:hover {
+  @apply border-brand-primary/20 -translate-y-1;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3);
+}
+
+/* Typography & Colors */
+.text-gradient {
+  background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@utility bg-gradient-solar {
+  background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--surface-border);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-primary);
+  opacity: 0.5;
+}
+
+/* Buttons */
+.btn-primary {
+  @apply bg-gradient-solar text-[#070d1f] font-black py-5 px-10 rounded-[24px] 
+         transition-all duration-300 hover:scale-105 active:scale-95 
+         shadow-xl shadow-brand-primary/20 hover:shadow-brand-primary/30;
+}
+
+.btn-secondary {
+  @apply glass-panel text-text-main font-bold py-5 px-10 rounded-[24px] 
+         transition-all duration-300 hover:bg-brand-primary/10 active:scale-95;
+}
+
+/* Leaflet Overrides */
+.leaflet-container {
+  @apply rounded-[32px] border border-surface-border transition-all duration-700;
+  background: var(--bg-void) !important;
+}
+
+/* Remove invert/grayscale as we use dark tiles natively */
+.leaflet-tile-container {
+  opacity: 1;
+}
+
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.map-grid-overlay {
+  background-image: 
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}

@@ -1,0 +1,5 @@
+{
+  "name": "VoyageAI - The Smart Itinerary Planner",
+  "description": "VoyageAI is a web application where users can input their destination, interests, budget, and dates, and an AI generates a fully customized, day-by-day travel itinerary complete with maps, suggestions, and AI-generated images of their potential trip.",
+  "requestFramePermissions": []
+}
