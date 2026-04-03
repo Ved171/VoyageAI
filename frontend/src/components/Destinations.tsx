@@ -103,8 +103,11 @@ const Destinations: React.FC = () => {
     setError(null);     // Clear any previous errors
     
     try {
-      // Create the endpoint URL. If there is a search query, attach it as '?search=value'
-      const endpoint = query ? `/api/destinations?search=${encodeURIComponent(query)}` : '/api/destinations';
+      // Create the endpoint URL (Using absolute URL for production)
+      const baseUrl = import.meta.env.VITE_API_URL || '';
+      const endpoint = query 
+        ? `${baseUrl}/api/destinations?search=${encodeURIComponent(query)}` 
+        : `${baseUrl}/api/destinations`;
       
       const response = await fetch(endpoint);
       
