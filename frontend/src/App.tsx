@@ -197,8 +197,8 @@ const App: React.FC = () => {
       } />
 
       {/* Protected Main Layout for all other pages */}
-      <Route element={
-        <ProtectedRoute>
+      <Route element={<ProtectedRoute />}>
+        <Route element={
           <div className="min-h-screen flex flex-col font-sans relative overflow-x-hidden bg-bg-void py-4 px-4 transition-colors duration-500">
             <div className="app-container max-w-[1440px] mx-auto flex flex-col">
               <Header onGoHome={handleCreateNewTrip} localization={itinerary?.localization || null} />
@@ -208,8 +208,7 @@ const App: React.FC = () => {
             </div>
             <Footer />
           </div>
-        </ProtectedRoute>
-      }>
+        }>
         {/* Protected Core Routes */}
         <Route path="/" element={
           <div className="flex flex-col items-center">
@@ -247,6 +246,7 @@ const App: React.FC = () => {
         <Route path="/destinations" element={<Destinations />} />
         <Route path="/favorites" element={<Favorites />} />
       </Route>
+    </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

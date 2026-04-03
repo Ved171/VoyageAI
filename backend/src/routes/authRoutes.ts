@@ -21,10 +21,12 @@ function generateRefreshToken(userId: string): string {
 }
 
 function setRefreshCookie(res: Response, token: string): void {
+  const isProduction = process.env.NODE_ENV === 'production';
+  
   res.cookie('refreshToken', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: isProduction, // Must be true when SameSite is None
+    sameSite: isProduction ? 'none' : 'lax', // Use 'none' for cross-domain production
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     path: '/api/auth',
   });
