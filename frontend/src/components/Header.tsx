@@ -1,6 +1,6 @@
 import React, { useState, lazy, Suspense } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { Globe, User, LogOut, Heart, ChevronDown, Rocket } from 'lucide-react';
+import { Globe, User, LogOut, Heart, ChevronDown, Rocket, Menu, X } from 'lucide-react';
 import { Localization } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import ThemeToggle from './ThemeToggle';
@@ -17,6 +17,7 @@ const Header: React.FC<HeaderProps> = ({ onGoHome, localization }) => {
   const navigate = useNavigate();
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     setShowUserMenu(false);
@@ -30,7 +31,7 @@ const Header: React.FC<HeaderProps> = ({ onGoHome, localization }) => {
 
   return (
     <>
-      <header className="py-10 px-16 lg:px-20 flex items-center justify-between z-50">
+      <header className="py-6 md:py-10 px-4 sm:px-6 md:px-8 flex items-center justify-between z-50">
         <Link 
           to="/" 
           className="flex items-center cursor-pointer group" 
@@ -103,8 +104,71 @@ const Header: React.FC<HeaderProps> = ({ onGoHome, localization }) => {
           <div className="hidden sm:block">
             <ThemeToggle />
           </div>
+
+          <button 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="xl:hidden w-12 h-12 rounded-2xl glass-panel flex items-center justify-center hover:bg-brand-primary/10 transition-all border-surface-border active:scale-95"
+          >
+            {isMobileMenuOpen ? <X className="h-6 w-6 text-brand-primary" /> : <Menu className="h-6 w-6 text-text-main" />}
+          </button>
         </div>
       </header>
+
+      {/* Mobile Menu Overlay */}
+      <div 
+        className={`fixed inset-0 z-[60] xl:hidden pointer-events-none transition-all duration-500 ${
+          isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0'
+        }`}
+      >
+        {/* Backdrop blur overlay */}
+        <div 
+          className="absolute inset-0 bg-bg-void/80 backdrop-blur-md" 
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+        
+        {/* Navigation panel */}
+        <div 
+          className={`absolute right-4 top-24 left-4 glass-card p-8 border-surface-border transition-all duration-500 transform ${
+            isMobileMenuOpen ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-10 opacity-0 scale-95'
+          }`}
+        >
+          <nav className="flex flex-col gap-4">
+            {[
+              { to: '/', label: 'Home' },
+              { to: '/destinations', label: 'Destinations' },
+              { to: '/saved-trips', label: 'My Trips' },
+            ].map((link) => (
+              <NavLink 
+                key={link.to} 
+                to={link.to} 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={({ isActive }) => 
+                  `px-8 py-5 rounded-3xl text-sm font-black uppercase tracking-[0.2em] transition-all flex items-center justify-between ${
+                    isActive 
+                      ? 'bg-brand-primary/10 text-brand-primary border border-brand-primary/30' 
+                      : 'text-text-muted hover:text-text-main hover:bg-brand-primary/5'
+                  }`
+                }
+              >
+                {link.label}
+              </NavLink>
+            ))}
+            <button 
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                setIsAboutModalOpen(true);
+              }}
+              className="px-8 py-5 rounded-3xl text-sm font-black uppercase tracking-[0.2em] text-text-muted hover:text-text-main hover:bg-brand-primary/5 text-left border border-transparent transition-all"
+            >
+              About VoyageAI
+            </button>
+            <div className="mt-4 pt-8 border-t border-surface-border flex items-center justify-between">
+              <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Toggle Theme</span>
+              <ThemeToggle />
+            </div>
+          </nav>
+        </div>
+      </div>
 
       {/* Overlay to close menu */}
       {showUserMenu && (

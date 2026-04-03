@@ -36,6 +36,12 @@ export interface DestinationQuote {
   translation: string;
 }
 
+export interface TransportDetail {
+  time: string;
+  mode: string;
+  location: string;
+}
+
 export interface Itinerary {
   _id?: string;
   memberRole?: 'owner' | 'member';
@@ -48,6 +54,8 @@ export interface Itinerary {
   dailyPlans: DayPlan[];
   packingList: string[];
   travelCost: TravelCost;
+  departureInfo: TransportDetail;
+  returnInfo: TransportDetail;
   destinationQuote: DestinationQuote;
   localization: Localization;
   isComplete?: boolean;

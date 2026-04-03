@@ -58,7 +58,7 @@ const AuthPage: React.FC<{ initialMode?: AuthMode }> = ({ initialMode = 'login' 
     <div className="min-h-screen flex flex-col font-sans relative overflow-hidden bg-bg-void py-4 px-4 items-center justify-center transition-colors duration-500">
       
       {/* Theme Toggle Positioned Top Right */}
-      <div className="absolute top-8 right-8 z-50">
+      <div className="absolute top-4 right-4 md:top-8 md:right-8 z-50">
         <ThemeToggle />
       </div>
       
@@ -74,22 +74,22 @@ const AuthPage: React.FC<{ initialMode?: AuthMode }> = ({ initialMode = 'login' 
       <div className="w-full max-w-[500px] relative z-10 animate-fadeInUp">
         
         {/* Logo Section */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-4 mb-6">
-            <div className="w-14 h-14 bg-gradient-solar rounded-2xl flex items-center justify-center shadow-2xl shadow-brand-primary/20 rotate-12">
-              <Rocket className="h-7 w-7 text-void" />
+        <div className="text-center mb-8 md:mb-10">
+          <div className="inline-flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
+            <div className="w-10 h-10 md:w-14 md:h-14 bg-gradient-solar rounded-2xl flex items-center justify-center shadow-2xl shadow-brand-primary/20 rotate-12">
+              <Rocket className="h-5 w-5 md:h-7 md:w-7 text-void" />
             </div>
             <div className="text-left">
-              <h1 className="text-3xl font-black tracking-tighter text-text-main leading-none transition-colors duration-500">
+              <h1 className="text-2xl md:text-3xl font-black tracking-tighter text-text-main leading-none transition-colors duration-500">
                 VOYAGE<span className="text-gradient">AI</span>
               </h1>
-              <span className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] mt-1 leading-none transition-colors duration-500">Smart Travel Planner</span>
+              <span className="text-[8px] md:text-[10px] font-black text-text-muted uppercase tracking-[0.4em] mt-1 leading-none transition-colors duration-500 transition-colors duration-500">Smart Travel Planner</span>
             </div>
           </div>
         </div>
 
         {/* Auth Container */}
-        <div className="glass-card p-12 border-surface-border shadow-2xl transition-all duration-500">
+        <div className="glass-card p-6 md:p-12 border-surface-border shadow-2xl transition-all duration-500">
           <div className="mb-10">
             <h2 className="text-3xl font-black text-text-main mb-2 transition-colors duration-500">
               {mode === 'login' ? 'WELCOME BACK' : 'CREATE ACCOUNT'}

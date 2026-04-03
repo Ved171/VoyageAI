@@ -8,7 +8,7 @@ const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="w-full relative py-6 px-8 lg:px-20 mt-6 bg-card-bg backdrop-blur-3xl border-t border-surface-border transition-colors duration-500">
+    <footer className="w-full relative py-6 px-4 sm:px-6 md:px-8 lg:px-20 mt-6 bg-card-bg backdrop-blur-3xl border-t border-surface-border transition-colors duration-500">
       {/* Distinction Accent Line */}
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-brand-primary/30 to-transparent shadow-[0_0_15px_#ff9153]" />
 

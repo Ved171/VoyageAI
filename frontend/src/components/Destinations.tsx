@@ -170,7 +170,7 @@ const Destinations: React.FC = () => {
       
       {/* 1. Header & Search Section */}
       <div className="mb-16 text-center">
-        <h1 className="text-5xl md:text-7xl font-black text-text-main tracking-tighter mb-6">
+        <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-text-main tracking-tighter mb-6">
           World <span className="text-gradient">Wonders</span>
         </h1>
         <p className="text-lg text-text-muted font-medium max-w-2xl mx-auto mb-10">
@@ -178,7 +178,7 @@ const Destinations: React.FC = () => {
         </p>
 
         {/* Form used for handling search submissions */}
-        <form onSubmit={handleSearch} className="max-w-xl mx-auto relative group flex gap-2">
+        <form onSubmit={handleSearch} className="max-w-xl mx-auto relative group flex flex-col sm:flex-row gap-3 md:gap-2 px-2 sm:px-0">
           <div className="relative w-full">
             <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
                <Search className="h-5 w-5 text-text-muted" />
@@ -192,14 +192,14 @@ const Destinations: React.FC = () => {
                 // Auto-refresh when backspaced to empty
                 if (e.target.value === '') fetchDestinationsData('');
               }}
-              placeholder="Search famous places (e.g. Paris, Tokyo)..."
-              className="w-full bg-card-bg/40 border border-surface-border rounded-3xl py-5 pl-14 pr-8 text-text-main font-bold placeholder:text-text-muted/50 focus:outline-none focus:border-brand-primary/50 transition-all backdrop-blur-xl"
+              placeholder="Search places..."
+              className="w-full bg-card-bg/40 border border-surface-border rounded-2xl md:rounded-3xl py-4 md:py-5 pl-14 pr-8 text-text-main font-bold placeholder:text-text-muted/50 focus:outline-none focus:border-brand-primary/50 transition-all backdrop-blur-xl text-sm md:text-base"
             />
           </div>
           <button 
             type="submit"
             disabled={isLoading}
-            className="px-8 bg-brand-primary text-void rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center whitespace-nowrap border-none"
+            className="px-8 py-4 sm:py-0 bg-brand-primary text-void rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center whitespace-nowrap border-none"
           >
             Search
           </button>
@@ -273,7 +273,7 @@ const Destinations: React.FC = () => {
               </div>
 
               {/* Card Content section */}
-              <div className="p-8 flex-grow flex flex-col">
+              <div className="p-6 md:p-8 flex-grow flex flex-col">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-2xl font-black text-text-main leading-tight">
                     {/* Convert underscores back to spaces for frontend display */}

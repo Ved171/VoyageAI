@@ -24,6 +24,24 @@ const initialItinerarySchema = {
             },
             required: ['mode', 'estimatedCost', 'costDisclaimer'],
         },
+        departureInfo: {
+            type: SchemaType.OBJECT,
+            properties: {
+                time: { type: SchemaType.STRING },
+                mode: { type: SchemaType.STRING },
+                location: { type: SchemaType.STRING },
+            },
+            required: ['time', 'mode', 'location'],
+        },
+        returnInfo: {
+            type: SchemaType.OBJECT,
+            properties: {
+                time: { type: SchemaType.STRING },
+                mode: { type: SchemaType.STRING },
+                location: { type: SchemaType.STRING },
+            },
+            required: ['time', 'mode', 'location'],
+        },
         destinationQuote: {
             type: SchemaType.OBJECT,
             properties: {
@@ -51,7 +69,7 @@ const initialItinerarySchema = {
     required: [
         'destination', 'duration', 'tripTitle', 'tripSummary', 
         'latitude', 'longitude',
-        'packingList', 'travelCost', 'destinationQuote', 'localization'
+        'packingList', 'travelCost', 'departureInfo', 'returnInfo', 'destinationQuote', 'localization'
     ],
 };
 
@@ -172,6 +190,11 @@ export async function* generateItinerary(preferences: UserPreferences): AsyncGen
         
         Provide a realistic estimated total cost for the trip in the local currency of ${origin}. Include the currency symbol and code (e.g., INR, EUR, GBP).
         Provide a breakdown of the cost if possible.
+
+        Crucially, provide details for getting from ${origin} to ${destination}:
+        1. "departureInfo": Specific time (e.g. 08:30 AM), mode (e.g. Flight AI-302), and location (e.g. ${origin} International).
+        2. "returnInfo": Specific time (e.g. 09:45 PM), mode (e.g. Express Train), and location (e.g. ${destination} Central Terminal).
+
         Provide only the initial metadata based on the specified JSON schema.
     `;
     

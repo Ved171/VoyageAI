@@ -36,6 +36,12 @@ export interface ILocalization {
   };
 }
 
+export interface ITransportDetail {
+  time: string;
+  mode: string;
+  location: string;
+}
+
 export interface IItinerary extends Document {
   userId: mongoose.Types.ObjectId;
   destination: string;
@@ -45,6 +51,8 @@ export interface IItinerary extends Document {
   dailyPlans: IDayPlan[];
   packingList: string[];
   travelCost: ITravelCost;
+  departureInfo: ITransportDetail;
+  returnInfo: ITransportDetail;
   destinationQuote: IDestinationQuote;
   localization: ILocalization;
   isComplete: boolean;
@@ -93,6 +101,16 @@ const ItinerarySchema = new Schema<IItinerary>(
       translatedStrings: {
         aboutUs: String,
       },
+    },
+    departureInfo: {
+      time: String,
+      mode: String,
+      location: String,
+    },
+    returnInfo: {
+      time: String,
+      mode: String,
+      location: String,
     },
     isComplete: { type: Boolean, default: false },
   },

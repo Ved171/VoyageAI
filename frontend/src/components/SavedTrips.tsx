@@ -63,7 +63,7 @@ const TripCard: React.FC<{
       </div>
       
       {/* Content */}
-      <div className="p-8 flex flex-col flex-grow">
+      <div className="p-6 md:p-8 flex flex-col flex-grow">
         <h4 className="text-2xl font-black text-text-main truncate mb-2 transition-colors duration-500">
           {trip.destination}
         </h4>
@@ -113,7 +113,7 @@ const SavedTrips: React.FC<SavedTripsProps> = ({ savedTrips, onLoadTrip, onDelet
   });
 
   return (
-    <div className="max-w-6xl mx-auto py-12 px-6 animate-fadeInUp">
+    <div className="max-w-6xl mx-auto py-8 md:py-12 px-4 md:px-6 animate-fadeInUp">
       <div className="flex items-center gap-4 mb-12">
         <button 
           onClick={() => navigate('/')}
@@ -122,28 +122,28 @@ const SavedTrips: React.FC<SavedTripsProps> = ({ savedTrips, onLoadTrip, onDelet
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
-          <h2 className="text-4xl font-black text-text-main tracking-tight uppercase transition-colors duration-500">My Mission <span className="text-gradient">Library</span></h2>
-          <p className="text-sm font-bold text-text-muted uppercase tracking-[0.2em] transition-colors duration-500">Your collection of planned adventures</p>
+          <h2 className="text-xl md:text-3xl lg:text-4xl font-black text-text-main tracking-tight uppercase transition-colors duration-500">My Mission <span className="text-gradient">Library</span></h2>
+          <p className="text-[10px] md:text-xs lg:text-sm font-bold text-text-muted uppercase tracking-[0.2em] transition-colors duration-500">Your collection of planned adventures</p>
         </div>
       </div>
 
       {savedTrips.length > 0 && (
-        <div className="flex gap-4 mb-8">
+        <div className="flex flex-wrap gap-3 md:gap-4 mb-8">
           <button
             onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${filter === 'all' ? 'bg-brand-primary text-black' : 'bg-surface-panel text-text-muted hover:text-text-main'}`}
+            className={`px-4 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all ${filter === 'all' ? 'bg-brand-primary text-black' : 'bg-surface-panel text-text-muted hover:text-text-main'}`}
           >
             All Trips
           </button>
           <button
             onClick={() => setFilter('owned')}
-            className={`px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${filter === 'owned' ? 'bg-brand-primary text-black' : 'bg-surface-panel text-text-muted hover:text-text-main'}`}
+            className={`px-4 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all ${filter === 'owned' ? 'bg-brand-primary text-black' : 'bg-surface-panel text-text-muted hover:text-text-main'}`}
           >
             Created By Me
           </button>
           <button
             onClick={() => setFilter('shared')}
-            className={`px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${filter === 'shared' ? 'bg-brand-primary text-black' : 'bg-surface-panel text-text-muted hover:text-text-main'}`}
+            className={`px-4 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all ${filter === 'shared' ? 'bg-brand-primary text-black' : 'bg-surface-panel text-text-muted hover:text-text-main'}`}
           >
             Shared With Me
           </button>
@@ -151,7 +151,7 @@ const SavedTrips: React.FC<SavedTripsProps> = ({ savedTrips, onLoadTrip, onDelet
       )}
 
       {filteredTrips.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {filteredTrips.map((trip, idx) => (
             <TripCard 
               key={trip._id || idx} 
@@ -165,7 +165,7 @@ const SavedTrips: React.FC<SavedTripsProps> = ({ savedTrips, onLoadTrip, onDelet
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-40 glass-card">
+        <div className="flex flex-col items-center justify-center py-20 md:py-40 glass-card">
           <Bookmark className="h-16 w-16 text-text-muted opacity-20 mb-6" />
           <p className="text-xl font-bold text-text-muted transition-colors duration-500">No saved trips found.</p>
           <button 

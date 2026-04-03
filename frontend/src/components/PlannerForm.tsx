@@ -114,7 +114,7 @@ const PlannerForm: React.FC<PlannerFormProps> = ({
               type="text"
               value={origin}
               onChange={e => setOrigin(e.target.value)}
-              className="w-full bg-transparent border border-surface-border rounded-2xl px-6 py-4 focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary text-3xl font-black text-text-main placeholder:text-text-muted/40 transition-all duration-500"
+              className="w-full bg-transparent border border-surface-border rounded-2xl px-6 py-4 focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary text-xl md:text-3xl font-black text-text-main placeholder:text-text-muted/40 transition-all duration-500"
               placeholder="e.g. London, UK"
             />
           </div>
@@ -131,7 +131,7 @@ const PlannerForm: React.FC<PlannerFormProps> = ({
               type="text"
               value={destination}
               onChange={e => setDestination(e.target.value)}
-              className="w-full bg-transparent border border-surface-border rounded-2xl px-6 py-4 focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary text-3xl font-black text-text-main placeholder:text-text-muted/40 transition-all duration-500"
+              className="w-full bg-transparent border border-surface-border rounded-2xl px-6 py-4 focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary text-xl md:text-3xl font-black text-text-main placeholder:text-text-muted/40 transition-all duration-500"
               placeholder="e.g. Tokyo, Japan"
             />
           </div>
@@ -184,7 +184,7 @@ const PlannerForm: React.FC<PlannerFormProps> = ({
             </div>
 
             {/* Interests Cloud */}
-            <div className="glass-card p-8 flex-grow">
+            <div className="glass-card p-6 md:p-8 flex-grow">
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
@@ -208,7 +208,7 @@ const PlannerForm: React.FC<PlannerFormProps> = ({
                       key={tag}
                       type="button"
                       onClick={() => onInterestToggle(tag)}
-                      className={`group relative flex items-center gap-3 px-7 py-4 rounded-2xl transition-all duration-300 ${
+                      className={`group relative flex items-center gap-2 md:gap-3 px-5 py-3 md:px-7 md:py-4 rounded-2xl transition-all duration-300 ${
                         isActive 
                           ? 'bg-brand-primary text-[#020617] font-black scale-105 shadow-xl shadow-brand-primary/20' 
                           : 'glass-panel text-text-main hover:border-brand-primary/30 hover:scale-105'
@@ -226,7 +226,7 @@ const PlannerForm: React.FC<PlannerFormProps> = ({
           {/* Quick Stats (1/3 width) */}
           <div className="lg:col-span-1 flex flex-col gap-8">
             {/* Duration Card */}
-            <div className="glass-card p-8 flex flex-col justify-between h-fit">
+            <div className="glass-card p-6 md:p-8 flex flex-col justify-between h-fit">
               <div>
                 <div className="flex items-center gap-3 mb-8">
                   <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
@@ -259,7 +259,7 @@ const PlannerForm: React.FC<PlannerFormProps> = ({
                       onBlur={() => {
                         if (duration === '' || Number(duration) < 1) setDuration(1);
                       }}
-                      className="w-32 bg-transparent text-6xl font-black text-text-main text-center outline-none transition-colors duration-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="w-24 md:w-32 bg-transparent text-4xl md:text-6xl font-black text-text-main text-center outline-none transition-colors duration-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                     <p className="text-xs font-bold text-text-muted uppercase tracking-widest transition-colors duration-500 -mt-1">Days</p>
                   </div>

@@ -194,6 +194,20 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
         doc.line(margin, y, pageWidth - margin, y);
         y += 10;
 
+        // Transport Logistics
+        if (itinerary.departureInfo && itinerary.returnInfo) {
+          addText(`MISSION LOGISTICS`, 14, true, [40, 40, 40]);
+          y += 2;
+          addText(`Outbound: ${itinerary.departureInfo.mode} at ${itinerary.departureInfo.time}`, 11, true, [255, 111, 75]);
+          addText(`Location: ${itinerary.departureInfo.location}`, 10, false, [100, 100, 100]);
+          y += 2;
+          addText(`Return: ${itinerary.returnInfo.mode} at ${itinerary.returnInfo.time}`, 11, true, [0, 184, 148]);
+          addText(`Location: ${itinerary.returnInfo.location}`, 10, false, [100, 100, 100]);
+          y += 6;
+          doc.line(margin, y, pageWidth - margin, y);
+          y += 10;
+        }
+
         // Daily Plans
         itinerary.dailyPlans?.forEach((day, idx) => {
           if (y > 250) { doc.addPage(); y = 20; }
@@ -325,7 +339,7 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
       <div className="w-full pb-20 animate-fadeInUp">
 
         {/* Expedition Overview Header */}
-        <div className="flex flex-col xl:flex-row items-end justify-between gap-10 mb-16">
+        <div className="flex flex-col xl:flex-row items-start xl:items-end justify-between gap-6 md:gap-10 mb-10 md:mb-16">
           <div className="max-w-3xl">
             <button
               onClick={onCreateNewTrip}
@@ -345,27 +359,27 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
             </div>
 
             <div ref={itineraryRef}>
-              <h1 className="text-6xl md:text-8xl font-black text-text-main tracking-tighter leading-[0.85] mb-8 transition-colors duration-500">
+              <h1 className="text-4xl md:text-6xl lg:text-8xl font-black text-text-main tracking-tighter leading-[0.85] mb-6 md:mb-8 transition-colors duration-500">
                 TRIP TO <span className="text-gradient">{itinerary.destination?.toUpperCase()}</span>
               </h1>
 
               <div className="flex flex-wrap gap-8">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl glass-panel flex items-center justify-center">
-                    <Calendar className="h-6 w-6 text-purple-400" />
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl glass-panel flex items-center justify-center">
+                    <Calendar className="h-5 w-5 md:h-6 md:w-6 text-purple-400" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-text-muted uppercase tracking-widest leading-none mb-1 transition-colors duration-500">Duration</p>
-                    <p className="text-lg font-black text-text-main leading-none transition-colors duration-500">{itinerary.duration} Days</p>
+                    <p className="text-[9px] md:text-[10px] font-black text-text-muted uppercase tracking-widest leading-none mb-1 transition-colors duration-500">Duration</p>
+                    <p className="text-base md:text-lg font-black text-text-main leading-none transition-colors duration-500">{itinerary.duration} Days</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl glass-panel flex items-center justify-center">
-                    <CheckCircle2 className="h-6 w-6 text-emerald-400" />
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl glass-panel flex items-center justify-center">
+                    <CheckCircle2 className="h-5 w-5 md:h-6 md:w-6 text-emerald-400" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-text-muted uppercase tracking-widest leading-none mb-1 transition-colors duration-500">Activities</p>
-                    <p className="text-lg font-black text-text-main leading-none transition-colors duration-500">{totalActivities} Locations</p>
+                    <p className="text-[9px] md:text-[10px] font-black text-text-muted uppercase tracking-widest leading-none mb-1 transition-colors duration-500">Activities</p>
+                    <p className="text-base md:text-lg font-black text-text-main leading-none transition-colors duration-500">{totalActivities} Locations</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -377,25 +391,25 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
                     <p className="text-lg font-black text-text-main leading-none transition-colors duration-500">{itinerary.localization?.targetLanguage || 'Global'}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl glass-panel flex items-center justify-center">
-                    <Wallet className="h-6 w-6 text-orange-400" />
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl glass-panel flex items-center justify-center">
+                    <Wallet className="h-5 w-5 md:h-6 md:w-6 text-orange-400" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-text-muted uppercase tracking-widest leading-none mb-1 transition-colors duration-500">Est. Cost</p>
-                    <p className="text-lg font-black text-text-main leading-none transition-colors duration-500">{itinerary.travelCost?.estimatedCost || 'Calculating...'}</p>
+                    <p className="text-[9px] md:text-[10px] font-black text-text-muted uppercase tracking-widest leading-none mb-1 transition-colors duration-500">Est. Cost</p>
+                    <p className="text-base md:text-lg font-black text-text-main leading-none transition-colors duration-500">{itinerary.travelCost?.estimatedCost || 'Calculating...'}</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4 w-full xl:w-auto">
             {(itinerary.memberRole === 'owner' || itinerary.memberRole === 'member') && (
               <button
                 onClick={() => setIsShareModalOpen(true)}
                 title={itinerary.memberRole === 'owner' ? "Add Members" : "View Members"}
-                className="flex items-center gap-3 glass-panel px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest border-white/5 hover:bg-brand-primary/5 transition-all active:scale-95 group"
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-3 glass-panel px-6 md:px-8 py-3 md:py-4 rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest border-white/5 hover:bg-brand-primary/5 transition-all active:scale-95 group"
               >
                 <Share2 className="h-4 w-4 group-hover:rotate-12 transition-transform opacity-70 group-hover:opacity-100 group-hover:text-brand-primary" />
                 {itinerary.memberRole === 'owner' ? "Add Members" : "View Members"}
@@ -407,10 +421,10 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
                 onClick={handleLeaveTripRequest}
                 disabled={isLeaving}
                 title="Leave Expedition"
-                className="flex items-center gap-3 glass-panel px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest border-red-500/20 hover:bg-red-500/10 hover:border-red-500/40 text-red-400 transition-all active:scale-95 group disabled:opacity-50"
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-3 glass-panel px-6 md:px-8 py-3 md:py-4 rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest border-red-500/20 hover:bg-red-500/10 hover:border-red-500/40 text-red-400 transition-all active:scale-95 group disabled:opacity-50"
               >
                 <X className="h-4 w-4 transition-transform group-hover:rotate-90" />
-                {isLeaving ? 'Leaving...' : 'Leave Trip'}
+                {isLeaving ? 'Leaving...' : 'Leave'}
               </button>
             )}
 
@@ -418,17 +432,60 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
               onClick={handleDownloadPdf}
               disabled={isGeneratingPdf}
               title="Download PDF Itinerary"
-              className="btn-primary flex items-center gap-3 shadow-brand-primary/20 hover:shadow-brand-primary/40 disabled:opacity-50"
+              className="flex-1 sm:flex-initial btn-primary flex items-center justify-center gap-3 shadow-brand-primary/20 hover:shadow-brand-primary/40 disabled:opacity-50 px-6 md:px-8 py-3 md:py-4 rounded-2xl text-[10px] md:text-xs"
             >
               {isGeneratingPdf ? (
                 <div className="w-4 h-4 border-2 border-[#020617] border-t-transparent rounded-full animate-spin" />
               ) : (
                 <Download className="h-4 w-4" />
               )}
-              {isGeneratingPdf ? 'GENERATING...' : 'DOWNLOAD PDF'}
+              {isGeneratingPdf ? '...' : 'PDF'}
             </button>
           </div>
         </div>
+
+        {/* Mission Logistics Section */}
+        {itinerary.departureInfo && itinerary.returnInfo && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+            {/* Departure Leg */}
+            <div className="glass-card p-6 md:p-8 flex items-center gap-6 relative overflow-hidden group border-brand-primary/20">
+              <div className="absolute top-0 left-0 w-1 h-full bg-brand-primary" />
+              <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-brand-primary/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-500 shadow-lg shadow-brand-primary/10">
+                <Plane className="h-6 w-6 md:h-8 md:w-8 text-brand-primary rotate-45" />
+              </div>
+              <div className="flex-grow">
+                <p className="text-[10px] font-black text-brand-primary uppercase tracking-[0.4em] mb-2">Outbound Mission</p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <h3 className="text-lg md:text-xl font-black text-text-main truncate">{itinerary.departureInfo.mode}</h3>
+                  <span className="text-xs md:text-sm font-black text-brand-primary bg-brand-primary/10 px-3 py-1 rounded-lg border border-brand-primary/20">{itinerary.departureInfo.time}</span>
+                </div>
+                <p className="text-xs font-bold text-text-muted uppercase tracking-widest mt-2 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
+                  Departure: {itinerary.departureInfo.location}
+                </p>
+              </div>
+            </div>
+
+            {/* Return Leg */}
+            <div className="glass-card p-6 md:p-8 flex items-center gap-6 relative overflow-hidden group border-brand-secondary/20">
+              <div className="absolute top-0 left-0 w-1 h-full bg-brand-secondary" />
+              <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-brand-secondary/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-500 shadow-lg shadow-brand-secondary/10">
+                <Rocket className="h-6 w-6 md:h-8 md:w-8 text-brand-secondary -rotate-45" />
+              </div>
+              <div className="flex-grow">
+                <p className="text-[10px] font-black text-brand-secondary uppercase tracking-[0.4em] mb-2">Return Trajectory</p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <h3 className="text-lg md:text-xl font-black text-text-main truncate">{itinerary.returnInfo.mode}</h3>
+                  <span className="text-xs md:text-sm font-black text-brand-secondary bg-brand-secondary/10 px-3 py-1 rounded-lg border border-brand-secondary/20">{itinerary.returnInfo.time}</span>
+                </div>
+                <p className="text-xs font-bold text-text-muted uppercase tracking-widest mt-2 flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-brand-secondary" />
+                  Terminal: {itinerary.returnInfo.location}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Tab Sub-Navigation */}
         {/* Tab Sub-Navigation */} <div className="flex flex-wrap gap-4 mb-10 border-b border-surface-border/50 pb-8"> {/* Itinerary Tab */} <button onClick={() => setActiveTab('itinerary')} className={`flex items-center gap-4 px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 hover:-translate-y-1 active:scale-95 border ${activeTab === 'itinerary' ? 'bg-brand-primary text-black border-brand-primary shadow-[0_25px_60px_-15px_rgba(255,145,83,0.45)]' : 'text-text-muted hover:text-brand-primary border-brand-primary/20 hover:border-brand-primary/40 bg-brand-primary/5 hover:bg-brand-primary/10 shadow-[0_20px_40px_-12px_rgba(255,145,83,0.15)] hover:shadow-[0_30px_60px_-12px_rgba(255,145,83,0.25)] hover:ring-2 hover:ring-brand-primary/20'}`} > <Layout className={`h-4 w-4 transition-transform duration-300 ${activeTab === 'itinerary' ? '' : 'opacity-70 group-hover:scale-110'}`} /> Itinerary </button> {/* Expenses Tab (Financial Ledger) */} <button onClick={() => setActiveTab('expenses')} className={`flex items-center gap-4 px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 hover:-translate-y-1 active:scale-95 border ${activeTab === 'expenses' ? 'bg-brand-tertiary text-white dark:text-[#011c12] border-brand-tertiary shadow-[0_25px_60px_-15px_rgba(5,150,105,0.45)] dark:shadow-[0_25px_60px_-15px_rgba(155,255,206,0.35)]' : 'text-brand-tertiary dark:text-brand-tertiary/80 border-brand-tertiary/30 dark:border-brand-tertiary/20 bg-brand-tertiary/5 dark:bg-brand-tertiary/5 hover:bg-brand-tertiary/10 dark:hover:bg-brand-tertiary/10 hover:border-brand-tertiary/50 dark:hover:border-brand-tertiary/40 shadow-[0_20px_40px_-12px_rgba(5,150,105,0.2)] hover:shadow-[0_30px_60px_-12px_rgba(5,150,105,0.35)] hover:ring-2 hover:ring-brand-tertiary/30'}`} > <Receipt className={`h-4 w-4 transition-transform duration-300 ${activeTab === 'expenses' ? '' : 'opacity-80 hover:scale-110'}`} /> Financial Ledger </button> {/* Chat Tab */} <button onClick={() => setActiveTab('chat')} className={`flex items-center gap-4 px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 hover:-translate-y-1 active:scale-95 border ${activeTab === 'chat' ? 'bg-[#3b82f6] text-white border-[#3b82f6] shadow-[0_25px_60px_-15px_rgba(59,130,246,0.45)]' : 'text-blue-500 dark:text-[#3b82f6]/80 border-blue-500/30 dark:border-[#3b82f6]/20 bg-blue-500/5 dark:bg-[#3b82f6]/5 hover:bg-blue-500/10 dark:hover:bg-[#3b82f6]/10 hover:border-blue-500/50 dark:hover:border-[#3b82f6]/40 shadow-[0_20px_40px_-12px_rgba(59,130,246,0.2)] hover:shadow-[0_30px_60px_-12px_rgba(59,130,246,0.35)] hover:ring-2 hover:ring-blue-500/30'}`} > <MessageSquare className={`h-4 w-4 transition-transform duration-300 ${activeTab === 'chat' ? '' : 'opacity-80 hover:scale-110'}`} /> Channel </button> </div>
@@ -466,18 +523,18 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
 
               {/* Center Column: Detailed Activities */}
               <div className="lg:col-span-7 space-y-8">
-                <div className="glass-card p-10 relative overflow-hidden group">
+                <div className="glass-card p-6 md:p-10 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/5 blur-[100px] -translate-y-1/2 translate-x-1/2 group-hover:bg-brand-primary/10 transition-colors" />
 
                   <div className="relative">
-                    <div className="flex items-end justify-between mb-12">
+                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10 md:mb-12">
                       <div>
                         <p className="text-[10px] font-black text-brand-primary uppercase tracking-[0.4em] mb-3 transition-colors duration-500">Day {selectedDayIndex + 1} Details</p>
-                        <h2 className="text-4xl font-black text-text-main leading-tight transition-colors duration-500">
+                        <h2 className="text-2xl md:text-4xl font-black text-text-main leading-tight transition-colors duration-500">
                           {selectedDay?.title || `Operations in ${itinerary.destination}`}
                         </h2>
                       </div>
-                      <div className="flex items-center gap-2 px-4 py-2 rounded-xl glass-panel border-white/5">
+                      <div className="w-fit flex items-center gap-2 px-4 py-2 rounded-xl glass-panel border-white/5">
                         <Navigation className="h-4 w-4 text-brand-tertiary" />
                         <span className="text-xs font-black text-text-main">{selectedDay?.activities?.length || 0} Stops</span>
                       </div>
