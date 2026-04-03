@@ -49,11 +49,11 @@ const Header: React.FC<HeaderProps> = ({ onGoHome, localization }) => {
         </Link>
 
         {/* Floating Nav */}
-        <nav className="hidden xl:flex items-center glass-panel rounded-full p-2 border border-surface-border shadow-2xl transition-colors duration-500">
-          <NavLink to="/" className={({ isActive }) => `px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${isActive ? 'bg-brand-primary/10 text-brand-primary' : 'text-text-muted hover:text-text-main hover:bg-brand-primary/5'}`}>Home</NavLink>
-          <NavLink to="/destinations" className={({ isActive }) => `px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${isActive ? 'bg-brand-primary/10 text-brand-primary' : 'text-text-muted hover:text-text-main hover:bg-brand-primary/5'}`}>Destinations</NavLink>
-          <NavLink to="/saved-trips" className={({ isActive }) => `px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${isActive ? 'bg-brand-primary/10 text-brand-primary' : 'text-text-muted hover:text-text-main hover:bg-brand-primary/5'}`}>My Trips</NavLink>
-          <button onClick={() => setIsAboutModalOpen(true)} className="px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest text-text-muted hover:text-text-main hover:bg-brand-primary/5 transition-all">About</button>
+        <nav className="hidden lg:flex items-center glass-panel rounded-full p-1 md:p-2 border border-surface-border shadow-2xl transition-colors duration-500">
+          <NavLink to="/" className={({ isActive }) => `px-4 xl:px-6 py-2 rounded-full text-[10px] xl:text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${isActive ? 'bg-brand-primary/10 text-brand-primary' : 'text-text-muted hover:text-text-main hover:bg-brand-primary/5'}`}>Home</NavLink>
+          <NavLink to="/destinations" className={({ isActive }) => `px-4 xl:px-6 py-2 rounded-full text-[10px] xl:text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${isActive ? 'bg-brand-primary/10 text-brand-primary' : 'text-text-muted hover:text-text-main hover:bg-brand-primary/5'}`}>Destinations</NavLink>
+          <NavLink to="/saved-trips" className={({ isActive }) => `px-4 xl:px-6 py-2 rounded-full text-[10px] xl:text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${isActive ? 'bg-brand-primary/10 text-brand-primary' : 'text-text-muted hover:text-text-main hover:bg-brand-primary/5'}`}>My Trips</NavLink>
+          <button onClick={() => setIsAboutModalOpen(true)} className="px-4 xl:px-6 py-2 rounded-full text-[10px] xl:text-xs font-black uppercase tracking-widest text-text-muted hover:text-text-main hover:bg-brand-primary/5 transition-all whitespace-nowrap">About</button>
         </nav>
 
         <div className="flex items-center gap-6">
@@ -107,16 +107,16 @@ const Header: React.FC<HeaderProps> = ({ onGoHome, localization }) => {
 
           <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="xl:hidden w-12 h-12 rounded-2xl glass-panel flex items-center justify-center hover:bg-brand-primary/10 transition-all border-surface-border active:scale-95"
+            className="lg:hidden w-10 h-10 md:w-12 md:h-12 rounded-2xl glass-panel flex items-center justify-center hover:bg-brand-primary/10 transition-all border-surface-border active:scale-95"
           >
-            {isMobileMenuOpen ? <X className="h-6 w-6 text-brand-primary" /> : <Menu className="h-6 w-6 text-text-main" />}
+            {isMobileMenuOpen ? <X className="h-5 w-5 md:h-6 md:w-6 text-brand-primary" /> : <Menu className="h-5 w-5 md:h-6 md:w-6 text-text-main" />}
           </button>
         </div>
       </header>
 
       {/* Mobile Menu Overlay */}
       <div 
-        className={`fixed inset-0 z-[60] xl:hidden pointer-events-none transition-all duration-500 ${
+        className={`fixed inset-0 z-[60] lg:hidden pointer-events-none transition-all duration-500 ${
           isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0'
         }`}
       >
@@ -128,7 +128,7 @@ const Header: React.FC<HeaderProps> = ({ onGoHome, localization }) => {
         
         {/* Navigation panel */}
         <div 
-          className={`absolute right-4 top-24 left-4 glass-card p-8 border-surface-border transition-all duration-500 transform ${
+          className={`absolute right-4 top-24 left-4 glass-card p-6 md:p-8 border-surface-border transition-all duration-500 transform ${
             isMobileMenuOpen ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-10 opacity-0 scale-95'
           }`}
         >
