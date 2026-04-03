@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
+const BASE_URL = import.meta.env.VITE_API_URL || '';
+
 interface User {
   _id: string;
   name: string;
@@ -33,7 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Silent refresh — attempt to get a new access token using the refresh cookie
   const silentRefresh = useCallback(async (): Promise<string | null> => {
     try {
-      const res = await fetch('/api/auth/refresh', {
+      const res = await fetch(`${BASE_URL}/api/auth/refresh`, {
         method: 'POST',
         credentials: 'include',
       });
@@ -71,7 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [accessToken, silentRefresh]);
 
   const login = useCallback(async (email: string, password: string) => {
-    const res = await fetch('/api/auth/login', {
+    const res = await fetch(`${BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -86,7 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signup = useCallback(async (name: string, email: string, password: string) => {
-    const res = await fetch('/api/auth/signup', {
+    const res = await fetch(`${BASE_URL}/api/auth/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -103,7 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = useCallback(async () => {
     try {
       if (accessToken) {
-        await fetch('/api/auth/logout', {
+        await fetch(`${BASE_URL}/api/auth/logout`, {
           method: 'POST',
           headers: { Authorization: `Bearer ${accessToken}` },
           credentials: 'include',

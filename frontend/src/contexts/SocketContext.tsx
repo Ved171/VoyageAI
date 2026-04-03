@@ -2,6 +2,8 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 interface SocketContextType {
   socket: Socket | null;
 }
@@ -20,7 +22,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      const newSocket = io('http://localhost:5000', {
+      const newSocket = io(BASE_URL, {
         withCredentials: true,
       });
 

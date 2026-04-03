@@ -16,11 +16,20 @@ dotenv.config();
 // Connect to Database
 connectDB();
 
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+
 const app = express();
+
+// CORS — allow frontend with credentials
+app.use(cors({
+  origin: FRONTEND_URL,
+  credentials: true,
+}));
+
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: FRONTEND_URL,
     credentials: true,
   },
 });
@@ -28,12 +37,6 @@ const io = new Server(httpServer, {
 export { io }; // Export for logic usage elsewhere
 
 const PORT = process.env.PORT || 5000;
-
-// CORS — allow frontend with credentials
-app.use(cors({
-  origin: 'http://localhost:3000',
-  credentials: true,
-}));
 
 // Middleware
 app.use(express.json());

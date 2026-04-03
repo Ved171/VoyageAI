@@ -51,7 +51,8 @@ export const TripChat: React.FC<TripChatProps> = ({ tripId, currentUser }) => {
     fetchHistory();
 
     // 2. Socket Connection
-    socketRef.current = io('http://localhost:5000');
+    const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    socketRef.current = io(SOCKET_URL);
     socketRef.current.emit('join_trip', tripId);
 
     socketRef.current.on('message_received', (newMessage: Message) => {

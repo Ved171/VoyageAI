@@ -1,6 +1,9 @@
 import { Itinerary, TripMemberInfo, UserSearchInfo, Expense, Settlement, BalanceSummary, Message } from '../types';
 
-const API_BASE = '/api/itineraries';
+// If VITE_API_URL is provided (e.g. in production), use it as the base URL.
+// Otherwise, use an empty string for relative paths (as handled by the Vite proxy in development).
+const BASE_URL = import.meta.env.VITE_API_URL || '';
+const API_BASE = `${BASE_URL}/api/itineraries`;
 
 // Token management — the access token is stored in memory via the auth context.
 // We accept a getter function so the service can always retrieve the latest token.
@@ -93,13 +96,13 @@ export const apiService = {
   },
 
   async getFavorites(): Promise<any[]> {
-    const response = await fetch('/api/favorites', {
+    const response = await fetch(`${BASE_URL}/api/favorites`, {
       headers: await authHeaders(),
       credentials: 'include',
     });
     const data = await handleResponse(response);
     if (data === null) {
-      const retryRes = await fetch('/api/favorites', {
+      const retryRes = await fetch(`${BASE_URL}/api/favorites`, {
         headers: await authHeaders(),
         credentials: 'include',
       });
@@ -109,7 +112,7 @@ export const apiService = {
   },
 
   async addFavorite(destination: any): Promise<any[]> {
-    const response = await fetch('/api/favorites', {
+    const response = await fetch(`${BASE_URL}/api/favorites`, {
       method: 'POST',
       headers: await authHeaders(),
       credentials: 'include',
@@ -117,7 +120,7 @@ export const apiService = {
     });
     const data = await handleResponse(response);
     if (data === null) {
-      const retryRes = await fetch('/api/favorites', {
+      const retryRes = await fetch(`${BASE_URL}/api/favorites`, {
         method: 'POST',
         headers: await authHeaders(),
         credentials: 'include',
@@ -129,14 +132,14 @@ export const apiService = {
   },
 
   async removeFavorite(name: string): Promise<any[]> {
-    const response = await fetch(`/api/favorites/${encodeURIComponent(name)}`, {
+    const response = await fetch(`${BASE_URL}/api/favorites/${encodeURIComponent(name)}`, {
       method: 'DELETE',
       headers: await authHeaders(),
       credentials: 'include',
     });
     const data = await handleResponse(response);
     if (data === null) {
-      const retryRes = await fetch(`/api/favorites/${encodeURIComponent(name)}`, {
+      const retryRes = await fetch(`${BASE_URL}/api/favorites/${encodeURIComponent(name)}`, {
         method: 'DELETE',
         headers: await authHeaders(),
         credentials: 'include',
@@ -220,13 +223,13 @@ export const apiService = {
   },
 
   async searchUsers(query: string): Promise<UserSearchInfo[]> {
-    const response = await fetch(`/api/users/search?q=${encodeURIComponent(query)}`, {
+    const response = await fetch(`${BASE_URL}/api/users/search?q=${encodeURIComponent(query)}`, {
       headers: await authHeaders(),
       credentials: 'include',
     });
     const data = await handleResponse(response);
     if (data === null) {
-      const retryRes = await fetch(`/api/users/search?q=${encodeURIComponent(query)}`, {
+      const retryRes = await fetch(`${BASE_URL}/api/users/search?q=${encodeURIComponent(query)}`, {
         headers: await authHeaders(),
         credentials: 'include',
       });
@@ -291,7 +294,7 @@ export const apiService = {
 
   // --- Group Chat ---
   async getTripMessages(tripId: string): Promise<Message[]> {
-    const response = await fetch(`/api/itineraries/${tripId}/messages`, {
+    const response = await fetch(`${BASE_URL}/api/itineraries/${tripId}/messages`, {
       headers: await authHeaders(),
       credentials: 'include',
     });
@@ -303,7 +306,7 @@ export const apiService = {
     // Delete Content-Type from headers so the browser sets it correctly for multipart/form-data
     const { 'Content-Type': _, ...rest } = headers as any;
     
-    const response = await fetch(`/api/itineraries/${tripId}/messages`, {
+    const response = await fetch(`${BASE_URL}/api/itineraries/${tripId}/messages`, {
       method: 'POST',
       headers: rest,
       credentials: 'include',
