@@ -247,22 +247,26 @@ export const TripChat: React.FC<TripChatProps> = ({ tripId, currentUser }) => {
 
       {/* Input Area */}
       <div className="p-6 bg-void/50 backdrop-blur-xl border-t border-white/5 relative z-20">
-        {/* Preview Bubble */}
+        {/* Preview Bubble - Improved for visibility and overflow */}
         {previewUrl && (
-          <div className="absolute top-0 left-8 -translate-y-[110%] glass-card p-4 border-brand-primary/30 flex items-center gap-4 animate-fadeInUp translate-y-0 shadow-2xl">
-            <div className="h-16 w-16 rounded-xl overflow-hidden border border-white/10">
-               <img src={previewUrl} className="h-full w-full object-cover" alt="Upload preview" />
+          <div className="absolute top-0 left-6 right-6 -translate-y-full mb-2 z-30 animate-fadeInUp">
+            <div className="bg-void/90 dark:bg-bg-void/95 backdrop-blur-2xl p-3 rounded-2xl border border-brand-primary/40 flex items-center gap-4 shadow-2xl shadow-brand-primary/20 max-w-sm mx-auto md:mx-0">
+              <div className="h-14 w-14 rounded-xl overflow-hidden border border-white/10 shadow-inner flex-shrink-0">
+                 <img src={previewUrl} className="h-full w-full object-cover" alt="Upload preview" />
+              </div>
+              <div className="flex-grow min-w-0">
+                 <p className="text-[9px] font-black text-brand-primary uppercase tracking-[0.2em] mb-0.5">Ready for Transmission</p>
+                 <p className="text-[10px] text-text-main font-bold truncate transition-colors duration-500">{selectedFile?.name}</p>
+                 <p className="text-[8px] text-text-muted font-black uppercase tracking-tighter">{(selectedFile!.size / 1024 / 1024).toFixed(2)} MB</p>
+              </div>
+              <button 
+                onClick={() => { setSelectedFile(null); setPreviewUrl(null); }}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-void transition-all border border-red-500/20"
+                title="Discard attachment"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </div>
-            <div className="flex-grow">
-               <p className="text-[10px] font-black text-brand-primary uppercase tracking-widest">Selected Media</p>
-               <p className="text-[9px] text-text-muted font-bold truncate max-w-[150px]">{selectedFile?.name}</p>
-            </div>
-            <button 
-              onClick={() => { setSelectedFile(null); setPreviewUrl(null); }}
-              className="p-2 hover:bg-red-500/10 text-red-400 rounded-lg"
-            >
-              <X className="h-4 w-4" />
-            </button>
           </div>
         )}
 

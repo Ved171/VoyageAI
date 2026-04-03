@@ -61,8 +61,8 @@ const TravelCostCard: React.FC<TravelCostCardProps> = ({ travelCost }) => {
       {/* Right Column: Chart & Legend */}
       {!isOther && (
         <div className="flex-1 w-full flex flex-col items-center md:items-end">
-          <div className="h-32 md:h-40 w-full max-w-xs relative drop-shadow-2xl">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-32 md:h-40 w-full max-w-xs relative drop-shadow-2xl min-h-[128px]">
+            <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={100}>
               <PieChart>
                 <Pie
                   data={BUDGET_DATA}

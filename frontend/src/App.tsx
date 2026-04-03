@@ -196,35 +196,35 @@ const App: React.FC = () => {
         isAuthenticated ? <Navigate to="/" replace /> : <AuthPage initialMode="signup" />
       } />
 
-      {/* Main Layout for all other pages */}
+      {/* Protected Main Layout for all other pages */}
       <Route element={
-        <div className="min-h-screen flex flex-col font-sans relative overflow-x-hidden bg-bg-void py-4 px-4 transition-colors duration-500">
-          <div className="app-container max-w-[1440px] mx-auto flex flex-col">
-            <Header onGoHome={handleCreateNewTrip} localization={itinerary?.localization || null} />
-            <main className="flex-grow relative px-16 lg:px-20">
-              <Outlet />
-            </main>
+        <ProtectedRoute>
+          <div className="min-h-screen flex flex-col font-sans relative overflow-x-hidden bg-bg-void py-4 px-4 transition-colors duration-500">
+            <div className="app-container max-w-[1440px] mx-auto flex flex-col">
+              <Header onGoHome={handleCreateNewTrip} localization={itinerary?.localization || null} />
+              <main className="flex-grow relative px-16 lg:px-20">
+                <Outlet />
+              </main>
+            </div>
+            <Footer />
           </div>
-          <Footer />
-        </div>
+        </ProtectedRoute>
       }>
         {/* Protected Core Routes */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="/" element={
-            <div className="flex flex-col items-center">
-              <div className="w-full max-w-5xl py-12">
-                <Hero savedTrips={savedTrips} onLoadTrip={handleLoadTrip} />
-                <PlannerForm 
-                  onPlanTrip={handlePlanTrip} 
-                  error={error} 
-                  isLoading={isLoading}
-                  externalInterests={interests}
-                  onInterestToggle={handleInterestToggle}
-                />
-              </div>
+        <Route path="/" element={
+          <div className="flex flex-col items-center">
+            <div className="w-full max-w-5xl py-12">
+              <Hero savedTrips={savedTrips} onLoadTrip={handleLoadTrip} />
+              <PlannerForm 
+                onPlanTrip={handlePlanTrip} 
+                error={error} 
+                isLoading={isLoading}
+                externalInterests={interests}
+                onInterestToggle={handleInterestToggle}
+              />
             </div>
-          } />
-        </Route>
+          </div>
+        } />
 
         {/* Other Routes */}
         <Route path="/saved-trips" element={

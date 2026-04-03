@@ -68,7 +68,7 @@ const AuthPage: React.FC<{ initialMode?: AuthMode }> = ({ initialMode = 'login' 
         <div className="absolute bottom-[10%] right-[5%] w-[400px] h-[400px] bg-brand-secondary/10 rounded-full blur-[100px]" />
         
         {/* Decorative Grid */}
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-50" />
+        <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-20 brightness-50" />
       </div>
 
       <div className="w-full max-w-[500px] relative z-10 animate-fadeInUp">
