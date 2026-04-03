@@ -106,7 +106,7 @@ router.get('/:id', async (req: AuthRequest, res) => {
     const role = await checkAccess(req.params.id, req.user!.userId);
     if (!role) return res.status(403).json({ message: 'Access denied to this itinerary' });
 
-    const itinerary = await Itinerary.findById(req.params.id);
+    const itinerary = await Itinerary.findById(req.params.id as string);
     if (!itinerary) return res.status(404).json({ message: 'Itinerary not found' });
     
     res.json({ ...itinerary.toJSON(), memberRole: role });
@@ -126,7 +126,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
     
     // Perform update
     const updatedItinerary = await Itinerary.findByIdAndUpdate(
-      req.params.id,
+      req.params.id as string,
       body,
       { new: true, runValidators: true }
     );
@@ -146,11 +146,11 @@ router.delete('/:id', async (req: AuthRequest, res) => {
     const role = await checkAccess(req.params.id, req.user!.userId);
     if (role !== 'owner') return res.status(403).json({ message: 'Only owners can delete trips' });
 
-    const deletedItinerary = await Itinerary.findByIdAndDelete(req.params.id);
+    const deletedItinerary = await Itinerary.findByIdAndDelete(req.params.id as string);
     if (!deletedItinerary) return res.status(404).json({ message: 'Itinerary not found' });
 
     // Clean up mapping
-    await TripMember.deleteMany({ tripId: req.params.id });
+    await TripMember.deleteMany({ tripId: req.params.id as string });
 
     res.json({ message: 'Itinerary deleted successfully' });
   } catch (error) {
@@ -166,10 +166,10 @@ router.get('/:id/members', async (req: AuthRequest, res) => {
     const role = await checkAccess(req.params.id, req.user!.userId);
     if (!role) return res.status(403).json({ message: 'Access denied' });
 
-    const members = await TripMember.find({ tripId: req.params.id }).populate('userId', 'name email');
+    const members = await TripMember.find({ tripId: req.params.id as string }).populate('userId', 'name email');
     
     // Backward compatibility for legacy trips: ensure the creator is always a member
-    const trip = await Itinerary.findById(req.params.id);
+    const trip = await Itinerary.findById(req.params.id as string);
     if (trip && trip.userId) {
       // Check if the trip owner is already in the members list
       const ownerExists = members.some(m => 
@@ -180,12 +180,12 @@ router.get('/:id/members', async (req: AuthRequest, res) => {
       if (!ownerExists) {
         // Automatically add the legacy creator to the TripMembers collection
         const newOwnerMember = await TripMember.create({
-          tripId: req.params.id,
+          tripId: new mongoose.Types.ObjectId(req.params.id as string),
           userId: trip.userId,
           role: 'owner'
         });
         
-        const populatedOwner = await TripMember.findById(newOwnerMember._id).populate('userId', 'name email');
+        const populatedOwner = await TripMember.findById((newOwnerMember as any)._id).populate('userId', 'name email');
         if (populatedOwner) {
           // Push to the array so it's returned immediately
           members.unshift(populatedOwner);
@@ -210,12 +210,12 @@ router.post('/:id/members', async (req: AuthRequest, res) => {
     if (!targetUserId) return res.status(400).json({ message: 'Target user ID required' });
 
     // Check if user exists
-    const user = await User.findById(targetUserId);
+    const user = await User.findById(targetUserId as string);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     // UPSERT
     const member = await TripMember.findOneAndUpdate(
-      { tripId: req.params.id, userId: targetUserId },
+      { tripId: req.params.id as string, userId: targetUserId as string },
       { role: assignRole },
       { new: true, upsert: true }
     ).populate('userId', 'name email');
@@ -247,7 +247,7 @@ router.delete('/:id/members/:userId', async (req: AuthRequest, res) => {
       if (callerRole === 'owner') {
         return res.status(400).json({ message: 'Owners cannot leave the trip directly. Transfer ownership or delete the trip.' });
       }
-      await TripMember.findOneAndDelete({ tripId: req.params.id, userId: callerId });
+      await TripMember.findOneAndDelete({ tripId: req.params.id as string, userId: callerId });
       return res.json({ message: 'Successfully left the trip' });
     }
 
@@ -256,7 +256,7 @@ router.delete('/:id/members/:userId', async (req: AuthRequest, res) => {
       return res.status(403).json({ message: 'Only owners can remove other members' });
     }
 
-    await TripMember.findOneAndDelete({ tripId: req.params.id, userId: targetUserId });
+    await TripMember.findOneAndDelete({ tripId: req.params.id as string, userId: targetUserId as string });
     res.json({ message: 'Member removed successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error removing member', error });
@@ -271,7 +271,7 @@ router.get('/:id/expenses', async (req: AuthRequest, res) => {
     const role = await checkAccess(req.params.id, req.user!.userId);
     if (!role) return res.status(403).json({ message: 'Access denied' });
 
-    const expenses = await Expense.find({ tripId: req.params.id })
+    const expenses = await Expense.find({ tripId: req.params.id as string })
       .populate('paidBy', 'name email')
       .populate('createdBy', 'name email')
       .populate('participants.userId', 'name email')
@@ -313,7 +313,7 @@ router.post('/:id/expenses', async (req: AuthRequest, res) => {
 
     const saved = await expense.save();
     // Repopulate for immediate frontend rendering
-    const populated = await Expense.findById(saved._id)
+    const populated = await Expense.findById((saved as any)._id)
       .populate('paidBy', 'name email')
       .populate('createdBy', 'name email')
       .populate('participants.userId', 'name email');
@@ -330,7 +330,7 @@ router.delete('/:id/expenses/:expenseId', async (req: AuthRequest, res) => {
     const role = await checkAccess(req.params.id, req.user!.userId);
     if (!role) return res.status(403).json({ message: 'Access denied' });
 
-    const expense = await Expense.findById(req.params.expenseId);
+    const expense = await Expense.findById(req.params.expenseId as string);
     if (!expense) return res.status(404).json({ message: 'Expense not found' });
 
     // Only owner of trip or creator of expense can delete
@@ -338,7 +338,7 @@ router.delete('/:id/expenses/:expenseId', async (req: AuthRequest, res) => {
       return res.status(403).json({ message: 'Only trip owners or expense creators can delete this expense' });
     }
 
-    await Expense.findByIdAndDelete(req.params.expenseId);
+    await Expense.findByIdAndDelete(req.params.expenseId as string);
     res.json({ message: 'Expense deleted' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting expense', error });
@@ -351,7 +351,7 @@ router.get('/:id/settlements', async (req: AuthRequest, res) => {
     const role = await checkAccess(req.params.id, req.user!.userId);
     if (!role) return res.status(403).json({ message: 'Access denied' });
 
-    const settlements = await Settlement.find({ tripId: req.params.id })
+    const settlements = await Settlement.find({ tripId: req.params.id as string })
       .populate('fromUser', 'name email')
       .populate('toUser', 'name email')
       .sort({ date: -1, createdAt: -1 });
@@ -379,7 +379,7 @@ router.post('/:id/settlements', async (req: AuthRequest, res) => {
     });
 
     const saved = await settlement.save();
-    const populated = await Settlement.findById(saved._id)
+    const populated = await Settlement.findById((saved as any)._id)
       .populate('fromUser', 'name email')
       .populate('toUser', 'name email');
 
@@ -448,7 +448,7 @@ router.get('/:id/messages', async (req: AuthRequest, res) => {
     const role = await checkAccess(req.params.id, req.user!.userId);
     if (!role) return res.status(403).json({ message: 'Access denied to this trip chat' });
 
-    const messages = await Message.find({ tripId: req.params.id })
+    const messages = await Message.find({ tripId: req.params.id as string })
       .populate('userId', 'name email')
       .sort({ createdAt: -1 })
       .limit(50); // Pagination could be added but for now last 50
@@ -483,7 +483,7 @@ router.post('/:id/messages', upload.single('image'), async (req: AuthRequest, re
     });
 
     const saved = await newMessage.save();
-    const populated = await Message.findById(saved._id).populate('userId', 'name email');
+    const populated = await Message.findById((saved as any)._id).populate('userId', 'name email');
 
     if (populated) {
       // Broadcast to trip room
