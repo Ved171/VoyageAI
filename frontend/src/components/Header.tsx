@@ -56,17 +56,18 @@ const Header: React.FC<HeaderProps> = ({ onGoHome, localization }) => {
           <button onClick={() => setIsAboutModalOpen(true)} className="px-4 xl:px-6 py-2 rounded-full text-[10px] xl:text-xs font-black uppercase tracking-widest text-text-muted hover:text-text-main hover:bg-brand-primary/5 transition-all whitespace-nowrap">About</button>
         </nav>
 
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <Link to="/favorites" title="Favorites" className="w-12 h-12 rounded-2xl glass-panel flex items-center justify-center hover:bg-brand-primary/10 transition-all active:scale-90 border-surface-border group">
+        <div className="flex items-center gap-3 md:gap-6">
+          {/* Favorites - Hidden on mobile, moved to menu */}
+          <div className="hidden md:flex items-center gap-2">
+            <Link to="/favorites" title="Favorites" className="w-10 h-10 md:w-12 md:h-12 rounded-2xl glass-panel flex items-center justify-center hover:bg-brand-primary/10 transition-all active:scale-90 border-surface-border group">
               <Heart className="h-5 w-5 text-text-muted group-hover:text-brand-secondary transition-colors" />
             </Link>
           </div>
           
-          <div className="h-10 w-[1px] bg-surface-border hidden md:block" />
+          <div className="h-10 w-[1px] bg-surface-border hidden lg:block" />
 
-          {/* User Status */}
-          <div className="relative">
+          {/* User Status - Desktop Only */}
+          <div className="relative hidden lg:block">
             <div 
               className="flex items-center glass-card p-1.5 pr-6 cursor-pointer hover:bg-brand-primary/5 border-surface-border"
               onClick={() => setShowUserMenu(!showUserMenu)}
@@ -132,11 +133,23 @@ const Header: React.FC<HeaderProps> = ({ onGoHome, localization }) => {
             isMobileMenuOpen ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-10 opacity-0 scale-95'
           }`}
         >
-          <nav className="flex flex-col gap-4">
+          <nav className="flex flex-col gap-3">
+            {/* User Info in Mobile Menu */}
+            <div className="flex items-center gap-4 p-4 mb-2 bg-brand-primary/5 rounded-3xl border border-brand-primary/10 transition-colors duration-500">
+               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-primary/20 to-brand-secondary/20 flex items-center justify-center border border-surface-border shrink-0">
+                  <span className="text-text-main text-xs font-black">{initials}</span>
+               </div>
+               <div className="overflow-hidden">
+                  <p className="text-sm font-black text-text-main leading-tight truncate transition-colors duration-500">{user?.name || 'Explorer'}</p>
+                  <p className="text-[10px] font-bold text-text-muted uppercase tracking-tighter truncate transition-colors duration-500">{user?.email}</p>
+               </div>
+            </div>
+
             {[
               { to: '/', label: 'Home' },
               { to: '/destinations', label: 'Destinations' },
               { to: '/saved-trips', label: 'My Trips' },
+              { to: '/favorites', label: 'Favorites' },
             ].map((link) => (
               <NavLink 
                 key={link.to} 
@@ -162,8 +175,16 @@ const Header: React.FC<HeaderProps> = ({ onGoHome, localization }) => {
             >
               About VoyageAI
             </button>
-            <div className="mt-4 pt-8 border-t border-surface-border flex items-center justify-between">
-              <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Toggle Theme</span>
+            <button 
+              onClick={handleLogout}
+              className="px-8 py-5 rounded-3xl text-sm font-black uppercase tracking-[0.2em] text-brand-secondary hover:bg-brand-secondary/10 text-left border border-brand-secondary/20 transition-all flex items-center justify-between group"
+            >
+              Log Out
+              <LogOut className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </button>
+
+            <div className="mt-2 pt-6 border-t border-surface-border flex items-center justify-between">
+              <span className="text-[10px] font-black text-text-muted uppercase tracking-widest transition-colors duration-500">Toggle Theme</span>
               <ThemeToggle />
             </div>
           </nav>
