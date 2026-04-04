@@ -89,7 +89,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, tripId,
 
   return createPortal(
     <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
-      {/* Deep Space Overlay */}
+      {/* Modal Overlay */}
       <div
         className="absolute inset-0 bg-void/80 backdrop-blur-xl transition-all"
         onClick={onClose}
@@ -104,7 +104,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, tripId,
           <div>
 
             <h2 className="text-2xl font-black text-text-main uppercase tracking-tighter italic">
-              Expedition Members
+              Trip Members
             </h2>
           </div>
           <button
@@ -126,7 +126,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, tripId,
               </div>
               <input
                 type="text"
-                placeholder="Search astronauts by name or email..."
+                placeholder="Search by name or email..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-void/50 border border-surface-border rounded-2xl py-4 pl-12 pr-4 text-text-main text-sm font-medium placeholder:text-text-muted/50 focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary/50 transition-all shadow-inner"
@@ -143,7 +143,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, tripId,
           {currentUserRole === 'owner' && searchResults.length > 0 && (
             <div className="mb-8 glass-panel rounded-2xl border border-brand-tertiary/20 overflow-hidden shadow-lg shadow-brand-tertiary/5">
               <h3 className="px-5 py-3 text-[10px] font-black text-brand-tertiary uppercase tracking-widest bg-brand-tertiary/10 border-b border-brand-tertiary/20">
-                Suggested Candidates
+                Suggested Travelers
               </h3>
               <div className="divide-y divide-surface-border max-h-48 overflow-y-auto scrollbar-hide">
                 {searchResults.map(user => (
@@ -173,7 +173,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, tripId,
           {/* Current Members */}
           <div>
             <h3 className="text-[10px] font-black text-text-muted tracking-widest uppercase mb-4 pl-2">
-              Active Crew ({members.length})
+              Active Members ({members.length})
             </h3>
             {isLoading ? (
               <div className="flex justify-center py-8">
@@ -194,9 +194,9 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, tripId,
                         </p>
                         <p className="text-text-muted text-[10px] uppercase tracking-widest font-black mt-1 flex items-center gap-2">
                           {member.role === 'owner' ? (
-                            <span className="text-brand-primary">Commanding Officer</span>
+                            <span className="text-brand-primary">Trip Owner</span>
                           ) : (
-                            <span className="opacity-70">Crew Member</span>
+                            <span className="opacity-70">Member</span>
                           )}
                         </p>
                       </div>
@@ -225,7 +225,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, tripId,
             onClick={onClose}
             className="w-full btn-primary py-4 shadow-brand-primary/20 text-sm font-black uppercase tracking-widest rounded-2xl"
           >
-            Acknowledge & Close
+            Confirm & Close
           </button>
         </div>
       </div>

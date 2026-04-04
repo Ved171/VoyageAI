@@ -122,7 +122,7 @@ const SavedTrips: React.FC<SavedTripsProps> = ({ savedTrips, onLoadTrip, onDelet
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
-          <h2 className="text-xl md:text-3xl lg:text-4xl font-black text-text-main tracking-tight uppercase transition-colors duration-500">My Mission <span className="text-gradient">Library</span></h2>
+          <h2 className="text-xl md:text-3xl lg:text-4xl font-black text-text-main tracking-tight uppercase transition-colors duration-500">My Trip <span className="text-gradient">Library</span></h2>
           <p className="text-[10px] md:text-xs lg:text-sm font-bold text-text-muted uppercase tracking-[0.2em] transition-colors duration-500">Your collection of planned adventures</p>
         </div>
       </div>
@@ -172,7 +172,7 @@ const SavedTrips: React.FC<SavedTripsProps> = ({ savedTrips, onLoadTrip, onDelet
             onClick={() => navigate('/')}
             className="mt-8 text-xs font-black text-brand-primary uppercase tracking-[0.4em] hover:opacity-70 transition-opacity"
           >
-            Start Your First Mission
+            Plan Your First Trip
           </button>
         </div>
       )}

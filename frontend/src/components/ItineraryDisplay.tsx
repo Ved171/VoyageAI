@@ -147,7 +147,7 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
   const handleDownloadPdf = () => {
     if (!itinerary) return;
     setIsGeneratingPdf(true);
-    toast.loading('Compiling Mission Data...', { id: 'pdf' });
+    toast.loading('Compiling Trip Data...', { id: 'pdf' });
 
     // Slight timeout allows React to render the loading spinner before the main thread locks
     setTimeout(() => {
@@ -180,7 +180,7 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
         };
 
         // Title Section
-        addText(`VOYAGE AI: EXPEDITION MANIFEST`, 10, true, [150, 150, 150]);
+        addText(`VOYAGE AI: TRAVEL ITINERARY`, 10, true, [150, 150, 150]);
         y += 5;
         addText(`TRIP TO ${itinerary.destination?.toUpperCase()}`, 24, true, [20, 20, 20]);
         y += 2;
@@ -196,7 +196,7 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
 
         // Transport Logistics
         if (itinerary.departureInfo && itinerary.returnInfo) {
-          addText(`MISSION LOGISTICS`, 14, true, [40, 40, 40]);
+          addText(`TRAVEL LOGISTICS`, 14, true, [40, 40, 40]);
           y += 2;
           addText(`Outbound: ${itinerary.departureInfo.mode} at ${itinerary.departureInfo.time}`, 11, true, [255, 111, 75]);
           addText(`Location: ${itinerary.departureInfo.location}`, 10, false, [100, 100, 100]);
@@ -454,7 +454,7 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
                 <Plane className="h-6 w-6 md:h-8 md:w-8 text-brand-primary rotate-45" />
               </div>
               <div className="flex-grow">
-                <p className="text-[10px] font-black text-brand-primary uppercase tracking-[0.4em] mb-2">Outbound Mission</p>
+                <p className="text-[10px] font-black text-brand-primary uppercase tracking-[0.4em] mb-2">Outbound Journey</p>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <h3 className="text-lg md:text-xl font-black text-text-main truncate">{itinerary.departureInfo.mode}</h3>
                   <span className="text-xs md:text-sm font-black text-brand-primary bg-brand-primary/10 px-3 py-1 rounded-lg border border-brand-primary/20">{itinerary.departureInfo.time}</span>
@@ -470,10 +470,10 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
             <div className="glass-card p-6 md:p-8 flex items-center gap-6 relative overflow-hidden group border-brand-secondary/20">
               <div className="absolute top-0 left-0 w-1 h-full bg-brand-secondary" />
               <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-brand-secondary/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-500 shadow-lg shadow-brand-secondary/10">
-                <Rocket className="h-6 w-6 md:h-8 md:w-8 text-brand-secondary -rotate-45" />
+                <Plane className="h-6 w-6 md:h-8 md:w-8 text-brand-secondary -rotate-45" />
               </div>
               <div className="flex-grow">
-                <p className="text-[10px] font-black text-brand-secondary uppercase tracking-[0.4em] mb-2">Return Trajectory</p>
+                <p className="text-[10px] font-black text-brand-secondary uppercase tracking-[0.4em] mb-2">Return Journey</p>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <h3 className="text-lg md:text-xl font-black text-text-main truncate">{itinerary.returnInfo.mode}</h3>
                   <span className="text-xs md:text-sm font-black text-brand-secondary bg-brand-secondary/10 px-3 py-1 rounded-lg border border-brand-secondary/20">{itinerary.returnInfo.time}</span>
@@ -528,7 +528,7 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
             }`}
           >
             <MessageSquare className={`h-4 w-4 shrink-0 ${activeTab === 'chat' ? '' : 'opacity-80'}`} />
-            <span className="text-center leading-tight">Channel</span>
+            <span className="text-center leading-tight">Trip Chat</span>
           </button>
         </div>
 
@@ -727,7 +727,7 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
                         <div className="w-2 h-2 rounded-full bg-brand-primary" />
                         <span className="text-[10px] font-black text-text-main uppercase tracking-tighter transition-colors duration-500">Viewing {itinerary.destination}</span>
                       </div>
-                      <span className="text-[9px] font-black text-text-muted font-mono transition-colors duration-500 uppercase tracking-widest">Orbital Link Active</span>
+                      <span className="text-[9px] font-black text-text-muted font-mono transition-colors duration-500 uppercase tracking-widest">Map Link Active</span>
                     </div>
                   </div>
 
@@ -754,7 +754,7 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
                       <Wallet className="h-5 w-5 text-brand-primary" />
                     </div>
                     <div>
-                      <h3 className="text-xs font-black text-text-muted uppercase tracking-[0.2em]">Mission Budgeting</h3>
+                      <h3 className="text-xs font-black text-text-muted uppercase tracking-[0.2em]">Trip Budgeting</h3>
                       <p className="text-[10px] font-bold text-text-muted opacity-60">AI-powered cost projections</p>
                     </div>
                   </div>
@@ -815,9 +815,9 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
         >
           <div className="flex items-center justify-between mb-6">
             <div className="flex flex-col">
-              <p className="text-[10px] font-black text-brand-primary uppercase tracking-[0.4em] mb-1">Planetary Trajectory</p>
+              <p className="text-[10px] font-black text-brand-primary uppercase tracking-[0.4em] mb-1">Route Overview</p>
               <h2 className="text-2xl font-black text-text-main uppercase tracking-tighter italic">
-                Full-Scale Mission Briefing: <span className="text-gradient">{itinerary.destination}</span>
+                Full-Scale Trip Briefing: <span className="text-gradient">{itinerary.destination}</span>
               </h2>
             </div>
             <button
@@ -852,9 +852,9 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
 
       <ConfirmationModal
         isOpen={isLeaveConfirmOpen}
-        title="Sever Operational Link"
-        message="Are you sure you want to leave this trip? This will immediately revoke your access to the expedition logs, finances, and mission channel. You cannot rejoin without a fresh invite."
-        confirmLabel="Sever Link"
+        title="Leave This Trip"
+        message="Are you sure you want to leave this trip? This will immediately revoke your access to the trip details, expenses, and chat. You cannot rejoin without a fresh invite."
+        confirmLabel="Leave Trip"
         onConfirm={handleConfirmLeave}
         onCancel={() => setIsLeaveConfirmOpen(false)}
         variant="warning"

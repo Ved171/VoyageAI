@@ -83,7 +83,7 @@ const AuthPage: React.FC<{ initialMode?: AuthMode }> = ({ initialMode = 'login' 
               <h1 className="text-2xl md:text-3xl font-black tracking-tighter text-text-main leading-none transition-colors duration-500">
                 VOYAGE<span className="text-gradient">AI</span>
               </h1>
-              <span className="text-[8px] md:text-[10px] font-black text-text-muted uppercase tracking-[0.4em] mt-1 leading-none transition-colors duration-500 transition-colors duration-500">Smart Travel Planner</span>
+              <span className="text-[8px] md:text-[10px] font-black text-text-muted uppercase tracking-[0.4em] mt-1 leading-none transition-colors duration-500 transition-colors duration-500">Travel Planner</span>
             </div>
           </div>
         </div>
@@ -137,7 +137,7 @@ const AuthPage: React.FC<{ initialMode?: AuthMode }> = ({ initialMode = 'login' 
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder="name@sector.com"
+                  placeholder="name@example.com"
                   required
                   className="w-full pl-14 pr-6 py-4 bg-brand-primary/5 border border-surface-border rounded-2xl text-text-main font-bold placeholder:text-text-muted transition-all text-sm focus:outline-none focus:border-brand-primary/30 focus:bg-brand-primary/10"
                 />
@@ -194,7 +194,7 @@ const AuthPage: React.FC<{ initialMode?: AuthMode }> = ({ initialMode = 'login' 
                 onClick={toggleMode}
                 className="ml-2 text-brand-primary font-black hover:text-text-main transition-colors"
               >
-                {mode === 'login' ? 'CREATE ID' : 'SIGN IN'}
+                {mode === 'login' ? 'CREATE ACCOUNT' : 'SIGN IN'}
               </button>
             </p>
           </div>
