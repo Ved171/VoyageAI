@@ -99,7 +99,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, tripId,
       <div className="relative w-full max-w-lg glass-card rounded-[32px] overflow-hidden flex flex-col max-h-[85vh] shadow-[0_0_50px_rgba(255,145,83,0.1)] animate-fadeInUp">
 
         {/* Header */}
-        <div className="flex items-center justify-between p-8 border-b border-surface-border bg-void/50 relative overflow-hidden">
+        <div className="flex items-center justify-between p-6 md:p-8 border-b border-surface-border bg-void/50 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/10 blur-[50px] -translate-y-1/2 translate-x-1/2" />
           <div>
 
@@ -116,7 +116,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, tripId,
         </div>
 
         {/* Body */}
-        <div className="p-8 flex-1 overflow-y-auto scrollbar-hide">
+        <div className="p-6 md:p-8 flex-1 overflow-y-auto scrollbar-hide">
 
           {/* Search Bar - ONLY VISIBLE FOR OWNERS */}
           {currentUserRole === 'owner' && (

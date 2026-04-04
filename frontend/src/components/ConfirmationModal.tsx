@@ -62,11 +62,11 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         style={{ backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}
         onClick={onCancel} 
       />
-      <div className={`w-full max-w-sm glass-card ${styles.border} animate-scaleIn shadow-2xl relative overflow-hidden group z-10`}>
+      <div className={`w-full max-w-sm glass-card ${styles.border} animate-scaleIn shadow-2xl relative overflow-y-auto max-h-[90vh] group z-10 custom-scrollbar`}>
         {/* Background glow base on variant */}
         <div className={`absolute top-0 right-0 w-32 h-32 ${variant === 'danger' ? 'bg-red-500/5' : 'bg-brand-primary/5'} blur-[60px] -translate-y-1/2 translate-x-1/2 pointer-events-none`} />
 
-        <div className="p-8">
+        <div className="p-6 md:p-8">
           <div className="flex items-center gap-4 mb-6">
             <div className={`w-12 h-12 rounded-2xl ${styles.bg} flex items-center justify-center shrink-0`}>
               <AlertCircle className={`h-6 w-6 ${styles.icon}`} />

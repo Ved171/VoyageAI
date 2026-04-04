@@ -30,7 +30,7 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
       onClick={onClose}
     >
       <div
-        className="glass-card max-w-3xl w-full mx-auto p-12 relative animate-fadeInUp border-surface-border overflow-hidden"
+        className="glass-card max-w-3xl w-full mx-auto p-6 md:p-12 relative animate-fadeInUp border-surface-border overflow-y-auto max-h-[90vh] custom-scrollbar"
         onClick={e => e.stopPropagation()}
       >
         {/* Background Accents */}
@@ -39,22 +39,22 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
 
         <button
           onClick={onClose}
-          className="absolute top-8 right-8 w-10 h-10 rounded-xl glass-panel flex items-center justify-center border-surface-border text-text-muted hover:text-text-main transition-all hover:rotate-90 z-20"
+          className="absolute top-4 right-4 md:top-8 md:right-8 w-10 h-10 rounded-xl glass-panel flex items-center justify-center border-surface-border text-text-muted hover:text-text-main transition-all hover:rotate-90 z-20"
           aria-label="Close modal"
         >
           <X className="h-5 w-5" />
         </button>
 
         <div className="relative">
-          <div className="flex flex-col items-center text-center mb-16">
-            <div className="w-16 h-16 bg-gradient-solar rounded-[22px] flex items-center justify-center mb-8 rotate-12 shadow-2xl shadow-brand-primary/20">
-              <Rocket className="h-8 w-8 text-void" />
+          <div className="flex flex-col items-center text-center mb-10 md:mb-16">
+            <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-solar rounded-xl md:rounded-[22px] flex items-center justify-center mb-6 md:mb-8 rotate-12 shadow-2xl shadow-brand-primary/20">
+              <Rocket className="h-6 w-6 md:h-8 md:w-8 text-void" />
             </div>
-            <h2 className="text-5xl font-black text-text-main tracking-tighter mb-4 uppercase transition-colors duration-500">
+            <h2 className="text-3xl md:text-5xl font-black text-text-main tracking-tighter mb-4 uppercase transition-colors duration-500">
               ABOUT <span className="text-gradient">US</span>
             </h2>
-            <div className="px-6 py-2 rounded-full bg-brand-primary/10 border border-brand-primary/20">
-              <p className="text-[10px] font-black tracking-[0.4em] text-brand-primary uppercase">Smart Travel Planning, Powered by AI</p>
+            <div className="px-4 md:px-6 py-2 rounded-full bg-brand-primary/10 border border-brand-primary/20">
+              <p className="text-[8px] md:text-[10px] font-black tracking-[0.3em] md:tracking-[0.4em] text-brand-primary uppercase">Smart Travel Planning, Powered by AI</p>
             </div>
           </div>
 
@@ -97,8 +97,8 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          <div className="p-8 glass-panel border-brand-primary/20 rounded-[32px] bg-brand-primary/5">
-            <p className="text-lg font-bold text-text-main italic text-center leading-relaxed transition-colors duration-500">
+          <div className="p-6 md:p-8 glass-panel border-brand-primary/20 rounded-2xl md:rounded-[32px] bg-brand-primary/5">
+            <p className="text-base md:text-lg font-bold text-text-main italic text-center leading-relaxed transition-colors duration-500">
               "We don't just plan trips; we craft the stories that make every journey unforgettable."
             </p>
           </div>
