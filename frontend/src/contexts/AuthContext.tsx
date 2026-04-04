@@ -5,6 +5,9 @@ const BASE_URL = import.meta.env.VITE_API_URL || '';
 /** Backup when httpOnly refresh cookie is not sent (common on mobile / cross-origin). */
 const ACCESS_STORAGE_KEY = 'voyageai_access';
 
+// To prevent concurrent refreshes from overlapping globally
+let globalRefreshPromise: Promise<string | null> | null = null;
+
 const authFetchInit = {
   credentials: 'include' as RequestCredentials,
   cache: 'no-store' as RequestCache,
@@ -85,9 +88,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
-  // To prevent concurrent refreshes from overlapping
-  const refreshPromiseRef = React.useRef<Promise<string | null> | null>(null);
 
   /**
    * Refresh access token using httpOnly cookie. Does NOT clear user/session on failure —
@@ -95,9 +95,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
    */
   const silentRefresh = useCallback(async (): Promise<string | null> => {
     // If a refresh is already in progress, return the existing promise
-    if (refreshPromiseRef.current) return refreshPromiseRef.current;
+    if (globalRefreshPromise) return globalRefreshPromise;
 
-    refreshPromiseRef.current = (async () => {
+    globalRefreshPromise = (async () => {
       try {
         const res = await fetch(`${BASE_URL}/api/auth/refresh`, {
           method: 'POST',
@@ -105,7 +105,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
 
         if (!res.ok) {
-          if (res.status === 403) console.warn('Refresh token rejected by server (403)');
+          if (res.status === 403) {
+            const data = await res.json().catch(() => ({}));
+            console.warn(`Refresh rejected by server (403): ${data.message || 'unknown error'}`);
+          }
           return null;
         }
 
@@ -120,11 +123,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Silent refresh failed:', err.message);
         return null;
       } finally {
-        refreshPromiseRef.current = null;
+        globalRefreshPromise = null;
       }
     })();
 
-    return refreshPromiseRef.current;
+    return globalRefreshPromise;
   }, []);
 
   const clearSession = useCallback(() => {

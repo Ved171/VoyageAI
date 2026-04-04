@@ -29,13 +29,12 @@ function refreshCookieOptions(): {
   maxAge: number;
   path: string;
 } {
-  const isProduction = process.env.NODE_ENV === 'production';
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
   return {
     httpOnly: true,
     secure: isProduction,
-    sameSite: isProduction ? 'none' : 'lax',
+    sameSite: isProduction ? 'none' : 'lax', // Must be none for secure to work in many cross-domain scenarios
     maxAge: 7 * 24 * 60 * 60 * 1000,
-    // Path '/' so every API request can send the cookie; '/api/auth' alone breaks on some mobile browsers
     path: '/',
   };
 }
@@ -174,16 +173,25 @@ router.post('/refresh', async (req: Request, res: Response) => {
     let decoded: { userId: string };
     try {
       decoded = jwt.verify(token, secret) as { userId: string };
-    } catch {
+    } catch (err: any) {
+      console.warn('⚠️ Refresh Token Verification Failed:', err.message);
       clearRefreshCookie(res);
-      res.status(403).json({ message: 'Invalid refresh token' });
+      res.status(403).json({ message: 'Invalid refresh token signature' });
       return;
     }
 
     const user = await User.findById(decoded.userId);
-    if (!user || user.refreshToken !== token) {
+    if (!user) {
+      console.warn('❗ Refresh failure: User NOT FOUND for ID in token');
       clearRefreshCookie(res);
-      res.status(403).json({ message: 'Refresh token revoked' });
+      res.status(403).json({ message: 'User not found for token' });
+      return;
+    }
+
+    if (user.refreshToken !== token) {
+      console.warn('❗ Refresh failure: Token MISMATCH (Revoked or Old session)');
+      clearRefreshCookie(res);
+      res.status(403).json({ message: 'Token revoked or outdated' });
       return;
     }
 
