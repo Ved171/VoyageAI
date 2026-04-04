@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, CheckCircle2, User as UserIcon, CreditCard, ArrowRight, ChevronDown } from 'lucide-react';
+import { X, CheckCircle2, User as UserIcon, CreditCard, ArrowRight, ChevronDown, Check } from 'lucide-react';
 import { apiService } from '../../services/apiService';
 import { TripMemberInfo } from '../../types';
 import toast from 'react-hot-toast';
@@ -24,14 +24,27 @@ export const SettleUpModal: React.FC<SettleUpModalProps> = ({
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [memberMenuOpen, setMemberMenuOpen] = useState(false);
+  const memberPickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) {
       setToUser(members[0]?.userId._id || '');
       setAmount('');
       setDate(new Date().toISOString().split('T')[0]);
+      setMemberMenuOpen(false);
     }
   }, [isOpen, members]);
+
+  useEffect(() => {
+    if (!memberMenuOpen) return;
+    const onPointerDown = (e: PointerEvent) => {
+      const el = memberPickerRef.current;
+      if (el && !el.contains(e.target as Node)) setMemberMenuOpen(false);
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, [memberMenuOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +78,7 @@ export const SettleUpModal: React.FC<SettleUpModalProps> = ({
         .settle-modal-solid { background-color: #0f172a; }
         .light .settle-modal-solid { background-color: #ffffff; }
       `}</style>
-      <div className="w-full max-w-md settle-modal-solid border border-brand-secondary/20 rounded-[32px] animate-scaleIn shadow-2xl shadow-brand-secondary/10 overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-visible rounded-[32px] border border-brand-secondary/20 settle-modal-solid shadow-2xl shadow-brand-secondary/10 animate-scaleIn">
         <div className="p-8 border-b border-surface-border flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-brand-secondary/10 flex items-center justify-center">
@@ -104,21 +117,56 @@ export const SettleUpModal: React.FC<SettleUpModalProps> = ({
 
             <div className="space-y-3 relative group">
               <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">Settling payment to:</p>
-              <div className="relative">
-                <select
-                  value={toUser}
-                  onChange={(e) => setToUser(e.target.value)}
-                  className="w-full bg-void/50 cursor-pointer border border-surface-border hover:border-brand-secondary/30 rounded-2xl px-6 py-4 text-text-main focus:outline-none focus:border-brand-secondary transition-all font-bold appearance-none shadow-sm"
+              <div className="relative" ref={memberPickerRef}>
+                <button
+                  type="button"
+                  id="settle-payee-trigger"
+                  aria-haspopup="listbox"
+                  aria-expanded={memberMenuOpen}
+                  aria-controls="settle-payee-listbox"
+                  onClick={() => setMemberMenuOpen((o) => !o)}
+                  className="w-full flex items-center justify-between gap-3 rounded-2xl border border-surface-border bg-void/50 px-6 py-4 text-left font-bold text-text-main shadow-sm transition-all hover:border-brand-secondary/30 focus:border-brand-secondary focus:outline-none focus:ring-2 focus:ring-brand-secondary/20"
                 >
-                  {members.map(member => (
-                    <option key={member._id} value={member.userId._id} className="bg-[#020617] text-text-main">
-                      {member.userId.name}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-6 flex items-center pointer-events-none text-text-muted group-hover:text-brand-secondary transition-colors">
-                  <ChevronDown className="w-5 h-5" />
-                </div>
+                  <span className="truncate">
+                    {members.find((m) => m.userId._id === toUser)?.userId.name ?? 'Choose member'}
+                  </span>
+                  <ChevronDown
+                    className={`h-5 w-5 shrink-0 text-text-muted transition-transform group-hover:text-brand-secondary ${memberMenuOpen ? 'rotate-180 text-brand-secondary' : ''}`}
+                  />
+                </button>
+                {memberMenuOpen && (
+                  <ul
+                    id="settle-payee-listbox"
+                    role="listbox"
+                    aria-labelledby="settle-payee-trigger"
+                    className="glass-panel absolute left-0 right-0 z-[1300] mt-2 max-h-52 overflow-y-auto rounded-2xl py-2 shadow-2xl custom-scrollbar"
+                  >
+                    {members.map((member) => {
+                      const selected = member.userId._id === toUser;
+                      return (
+                        <li key={member._id} role="presentation">
+                          <button
+                            type="button"
+                            role="option"
+                            aria-selected={selected}
+                            onClick={() => {
+                              setToUser(member.userId._id);
+                              setMemberMenuOpen(false);
+                            }}
+                            className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm font-bold transition-colors ${
+                              selected
+                                ? 'bg-brand-secondary/15 text-brand-secondary'
+                                : 'text-text-main hover:bg-brand-secondary/10'
+                            }`}
+                          >
+                            <span className="truncate">{member.userId.name}</span>
+                            {selected ? <Check className="h-4 w-4 shrink-0 text-brand-secondary" /> : null}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
               </div>
             </div>
 
