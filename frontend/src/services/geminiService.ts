@@ -126,7 +126,7 @@ async function callAI<T>(prompt: string, schema: any): Promise<T> {
 
     // Using the canonical SDK with the highly compatible 1.5-flash model
     const model = genAI.getGenerativeModel({
-        model: "gemini-3-flash",
+        model: "gemini-2.5-flash",
         generationConfig: {
             responseMimeType: "application/json",
             responseSchema: schema,
