@@ -621,7 +621,7 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
                               {itinerary?._id && (itinerary.memberRole === 'owner' || itinerary.memberRole === 'member') && (
                                 <button
                                   onClick={() => handleDeleteActivity(selectedDayIndex, idx)}
-                                  className="absolute right-0 top-10 opacity-0 group-hover/item:opacity-100 p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                                  className="absolute right-0 top-10 p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
                                   title="Remove stop"
                                 >
                                   <X className="w-4 h-4" />

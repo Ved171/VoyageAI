@@ -192,9 +192,12 @@ export async function* generateItinerary(preferences: UserPreferences): AsyncGen
         Provide a breakdown of the cost if possible.
 
         Crucially, provide details for getting from ${origin} to ${destination}:
-        1. "departureInfo": Specific time (e.g. 08:30 AM), mode (e.g. Flight AI-302), and location (e.g. ${origin} International).
-        2. "returnInfo": Specific time (e.g. 09:45 PM), mode (e.g. Express Train), and location (e.g. ${destination} Central Terminal).
+        1. "departureInfo": Specific time (e.g. 08:30 AM), mode (e.g. Driving or Flight AI-302), and location (e.g. ${origin} City Center or ${origin} International).
+        2. "returnInfo": Specific time (e.g. 09:45 PM), mode (e.g. Driving or Express Train), and location (e.g. ${destination} City Center).
 
+        CRITICAL: Consider the realistic distance and travel time between ${origin} and ${destination} using ${transportInfo}.
+        If the distance is long (e.g. over 500km) and mode is 'car', specify a very early departure time (e.g. 5:00 AM) and remind the daily plans to account for a full day of travel.
+        
         Provide only the initial metadata based on the specified JSON schema.
     `;
     
@@ -207,12 +210,33 @@ export async function* generateItinerary(preferences: UserPreferences): AsyncGen
 
     const pending = new Map<number, Promise<DayPlan>>();
     for (const dayNum of dayIndices) {
+        let additionalContext = '';
+        if (dayNum === 1) {
+            additionalContext = `
+                Note: This is the first day. The traveler is starting from ${origin} and arriving at ${destination}.
+                Departure Detail: Leaving ${origin} at ${initialData.departureInfo.time} via ${initialData.departureInfo.mode}.
+                CRITICAL: You MUST consider the travel time from ${origin} to ${destination} using ${initialData.travelCost.mode}.
+                If travel takes more than 2-3 hours, include "Travel and Arrival" as the first activity of the day with a realistic duration.
+                Do NOT schedule sightseeing activities before the traveler realistically arrives at the destination.
+                If travel takes many hours (e.g. driving 10+ hours), Day 1 should mostly be the travel activity and maybe just a dinner at the destination.
+            `;
+        } else if (dayNum === duration) {
+            additionalContext = `
+                Note: This is the last day. The traveler is returning from ${destination} to ${origin}.
+                Return Detail: Leaving ${destination} at ${initialData.returnInfo.time} via ${initialData.returnInfo.mode}.
+                CRITICAL: All activities MUST end before the return departure time.
+            `;
+        }
+
         const dayPrompt = `
             Provide a detailed daily itinerary for Day ${dayNum} of the trip to ${destination} titled "${initialData.tripTitle}".
+            Origin: ${origin}
             Interests: ${interests.join(', ')}
             Budget: ${budget}
             Primary Transport: ${initialData.travelCost.mode}
             
+            ${additionalContext}
+
             This is Day ${dayNum} of a ${duration}-day trip.
             Ensure context matches previous days if possible (stay consistent with the location).
             Provide only the daily plan for this specific day based on the specified JSON schema.
