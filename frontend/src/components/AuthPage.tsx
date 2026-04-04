@@ -76,7 +76,7 @@ const AuthPage: React.FC<{ initialMode?: AuthMode }> = ({ initialMode = 'login' 
         {/* Logo Section */}
         <div className="text-center mb-8 md:mb-10">
           <div className="inline-flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
-            <div className="w-10 h-10 md:w-14 md:h-14 bg-gradient-solar rounded-2xl flex items-center justify-center shadow-2xl shadow-brand-primary/20 rotate-12">
+            <div className="w-10 h-10 md:w-14 md:h-14 bg-gradient-solar rounded-2xl flex items-center justify-center shadow-2xl shadow-brand-primary/20">
               <Rocket className="h-5 w-5 md:h-7 md:w-7 text-void" />
             </div>
             <div className="text-left">
