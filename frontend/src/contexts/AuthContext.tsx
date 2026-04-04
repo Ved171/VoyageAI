@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { setTokenGetter } from '../services/apiService';
 
 const BASE_URL = import.meta.env.VITE_API_URL || '';
 
@@ -59,7 +60,8 @@ function looksLikeJwt(token: string): boolean {
 function isAccessTokenLikelyValid(token: string, skewMs = 60_000): boolean {
   const exp = getJwtExp(token);
   if (exp === null) return true;
-  return exp * 1000 > Date.now() - skewMs;
+  // Ensure token is valid for at least skewMs more
+  return exp * 1000 > Date.now() + skewMs;
 }
 
 function persistAccessToken(token: string | null) {
@@ -187,22 +189,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const getAccessToken = useCallback(
     async (forceRefresh = false): Promise<string | null> => {
+      // 1. Return current token if it's still likely valid and no force refresh is requested.
       if (!forceRefresh && accessToken && isAccessTokenLikelyValid(accessToken)) {
         return accessToken;
       }
 
+      // 2. We need a fresh token. Attempt silent refresh from httpOnly cookie.
+      // silentRefresh() itself has a global deduplication promise.
       const refreshed = await silentRefresh();
       if (refreshed) return refreshed;
 
-      if (accessToken && isAccessTokenLikelyValid(accessToken)) {
+      // 3. Fallback: silentRefresh failed. 
+      // If the failure was due to network/server being DOWN, we should NOT clearSession if the current token is still valid.
+      // But if we're here, it means the server didn't give us a fresh token.
+      
+      // Check if our current (old) token is still valid (using 0 skew margin for one last attempt).
+      if (accessToken && isAccessTokenLikelyValid(accessToken, 0)) {
+        console.warn('getAccessToken: silentRefresh failed, but old token appears valid according to our clock. Using it as fallback.');
         return accessToken;
       }
 
+      // 4. Session appears definitively invalid OR refresh failed and we have no fallback.
+      // Don't clear if it was likely a temporary network error? 
+      // Currently silentRefresh returns null for ALL errors. 
+      // But clearing here is what triggers the redirect to /login.
+      console.warn('getAccessToken: Session definitively expired or refresh failed. Clearing session.');
       clearSession();
       return null;
     },
     [accessToken, silentRefresh, clearSession]
   );
+
+  // Wire the token getter directly in the render body to ensure it's available 
+  // before children (Destinations, Favorites, etc.) mount and try to use it.
+  setTokenGetter(getAccessToken);
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await fetch(`${BASE_URL}/api/auth/login`, {

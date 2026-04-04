@@ -51,11 +51,6 @@ const App: React.FC = () => {
     }
   }, [isAuthenticated]);
 
-  // Wire the token getter into the API service
-  useEffect(() => {
-    setTokenGetter(getAccessToken);
-  }, [getAccessToken]);
-
   useEffect(() => {
     loadTrips();
   }, [loadTrips]);

@@ -7,7 +7,6 @@ import { Itinerary, TripMemberInfo, UserSearchInfo, Expense, Settlement, Balance
 const VITE_API_URL = import.meta.env.VITE_API_URL || '';
 const BASE_URL = VITE_API_URL.endsWith('/') ? VITE_API_URL.slice(0, -1) : VITE_API_URL;
 
-// Token management — the access token is stored in memory via the auth context.
 let getTokenFn: ((forceRefresh?: boolean) => Promise<string | null>) | null = null;
 
 export function setTokenGetter(fn: (forceRefresh?: boolean) => Promise<string | null>) {
@@ -47,10 +46,11 @@ async function fetchWithAuth(url: string, init: RequestInit = {}): Promise<any> 
 
   // 2. Handle 401 Unauthorized or 403 Forbidden (Token expired or invalid)
   if ((response.status === 401 || response.status === 403) && getTokenFn) {
-    console.warn(`Auth failed (${response.status}). Triggering refresh for:`, url);
+    console.warn(`Auth failed (${response.status}) for ${url}. Attempting token refresh...`);
     const newToken = await getTokenFn(true); // Force refresh
     
     if (newToken) {
+      console.log(`Token refresh successful for ${url}, retrying request...`);
       // 3. Retry with new token
       response = await fetch(fullUrl, {
         ...init,
@@ -58,6 +58,7 @@ async function fetchWithAuth(url: string, init: RequestInit = {}): Promise<any> 
         credentials: 'include',
       });
     } else {
+      console.error(`Token refresh failed for ${url}. User must re-authenticate.`);
       throw new Error('Session expired. Please sign in again.');
     }
   }
