@@ -67,7 +67,7 @@ const initialItinerarySchema = {
         },
     },
     required: [
-        'destination', 'duration', 'tripTitle', 'tripSummary', 
+        'destination', 'duration', 'tripTitle', 'tripSummary',
         'latitude', 'longitude',
         'packingList', 'travelCost', 'departureInfo', 'returnInfo', 'destinationQuote', 'localization'
     ],
@@ -113,7 +113,7 @@ const allDailyPlansSchema = {
 
 async function callAI<T>(prompt: string, schema: any): Promise<T> {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    
+
     if (!apiKey) {
         throw new Error("API Key is missing. Please check your environment configuration.");
     }
@@ -123,10 +123,10 @@ async function callAI<T>(prompt: string, schema: any): Promise<T> {
     console.log(`[GeminiService] Initializing call with key: ${maskedKey}`);
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    
+
     // Using the canonical SDK with the highly compatible 1.5-flash model
     const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash",
+        model: "gemini-3-flash",
         generationConfig: {
             responseMimeType: "application/json",
             responseSchema: schema,
@@ -141,15 +141,15 @@ async function callAI<T>(prompt: string, schema: any): Promise<T> {
         if (!rawText) {
             throw new Error("AI returned an empty response. Please try again.");
         }
-        
+
         // Robust JSON extraction to handle any potential pre/post text
         const firstIndex = rawText.indexOf('{');
         const lastIndex = rawText.lastIndexOf('}');
-        
+
         if (firstIndex === -1 || lastIndex === -1) {
-             throw new Error("Invalid response format from AI. Please try again.");
+            throw new Error("Invalid response format from AI. Please try again.");
         }
-        
+
         const jsonText = rawText.substring(firstIndex, lastIndex + 1);
         return JSON.parse(jsonText) as T;
     } catch (error: any) {
@@ -158,7 +158,7 @@ async function callAI<T>(prompt: string, schema: any): Promise<T> {
             if (error.message.includes('JSON')) {
                 throw new Error("The AI returned an invalid data format. Please try again.");
             }
-             if (error.message.includes('quota')) {
+            if (error.message.includes('quota')) {
                 throw new Error("API quota exceeded. Please try again in a moment.");
             }
             throw new Error(error.message);
@@ -172,10 +172,10 @@ export async function* generateItinerary(preferences: UserPreferences): AsyncGen
 
     // --- SERVICE-LEVEL VALIDATION ---
     if (!origin || !origin.trim()) {
-      throw new Error("Validation Error: Departure Point (Origin) is required.");
+        throw new Error("Validation Error: Departure Point (Origin) is required.");
     }
     if (!destination || !destination.trim()) {
-      throw new Error("Validation Error: Destination is required.");
+        throw new Error("Validation Error: Destination is required.");
     }
 
     // --- STAGE 1: Metadata ---
@@ -200,62 +200,55 @@ export async function* generateItinerary(preferences: UserPreferences): AsyncGen
         
         Provide only the initial metadata based on the specified JSON schema.
     `;
-    
+
     const initialData = await callAI<Omit<Itinerary, 'dailyPlans'>>(initialPrompt, initialItinerarySchema);
     let fullItinerary: Partial<Itinerary> = { ...initialData, dailyPlans: [] };
     yield { ...fullItinerary };
 
-    // --- STAGE 2: Daily activities (all requests start in parallel) ---
+    // --- STAGE 2: Daily activities (Processed in batches to avoid API rate limits) ---
     const dayIndices = Array.from({ length: duration }, (_, i) => i + 1);
-
-    const pending = new Map<number, Promise<DayPlan>>();
-    for (const dayNum of dayIndices) {
-        let additionalContext = '';
-        if (dayNum === 1) {
-            additionalContext = `
-                Note: This is the first day. The traveler is starting from ${origin} and arriving at ${destination}.
-                Departure Detail: Leaving ${origin} at ${initialData.departureInfo.time} via ${initialData.departureInfo.mode}.
-                CRITICAL: You MUST consider the travel time from ${origin} to ${destination} using ${initialData.travelCost.mode}.
-                If travel takes more than 2-3 hours, include "Travel and Arrival" as the first activity of the day with a realistic duration.
-                Do NOT schedule sightseeing activities before the traveler realistically arrives at the destination.
-                If travel takes many hours (e.g. driving 10+ hours), Day 1 should mostly be the travel activity and maybe just a dinner at the destination.
-            `;
-        } else if (dayNum === duration) {
-            additionalContext = `
-                Note: This is the last day. The traveler is returning from ${destination} to ${origin}.
-                Return Detail: Leaving ${destination} at ${initialData.returnInfo.time} via ${initialData.returnInfo.mode}.
-                CRITICAL: All activities MUST end before the return departure time.
-            `;
-        }
-
-        const dayPrompt = `
-            Provide a detailed daily itinerary for Day ${dayNum} of the trip to ${destination} titled "${initialData.tripTitle}".
-            Origin: ${origin}
-            Interests: ${interests.join(', ')}
-            Budget: ${budget}
-            Primary Transport: ${initialData.travelCost.mode}
-            
-            ${additionalContext}
-
-            This is Day ${dayNum} of a ${duration}-day trip.
-            Ensure context matches previous days if possible (stay consistent with the location).
-            Provide only the daily plan for this specific day based on the specified JSON schema.
-        `;
-        pending.set(dayNum, callAI<DayPlan>(dayPrompt, dailyPlanSchema));
-    }
-
     const completedDays: DayPlan[] = [];
+    const BATCH_SIZE = 4; // Process days in manageable groups
 
-    // Yield as soon as *any* day finishes — previously we awaited day 1, then 2, … so the UI
-    // stayed on "Planning…" until Day 1 returned even if other days were already done.
-    while (pending.size > 0) {
-        const { dayNum, dayPlan } = await Promise.race(
-            [...pending.entries()].map(([num, prom]) =>
-                prom.then((plan) => ({ dayNum: num, dayPlan: plan }))
-            )
-        );
-        pending.delete(dayNum);
-        completedDays.push(dayPlan);
+    for (let i = 0; i < dayIndices.length; i += BATCH_SIZE) {
+        const batch = dayIndices.slice(i, i + BATCH_SIZE);
+        const batchPromises = batch.map(dayNum => {
+            let additionalContext = '';
+            if (dayNum === 1) {
+                additionalContext = `
+                    Note: This is the first day. The traveler is starting from ${origin} and arriving at ${destination}.
+                    Departure Detail: Leaving ${origin} at ${initialData.departureInfo.time} via ${initialData.departureInfo.mode}.
+                    CRITICAL: You MUST consider the travel time from ${origin} to ${destination} using ${initialData.travelCost.mode}.
+                    If travel takes more than 2-3 hours, include "Travel and Arrival" as the first activity of the day with a realistic duration.
+                    Do NOT schedule sightseeing activities before the traveler realistically arrives at the destination.
+                    If travel takes many hours (e.g. driving 10+ hours), Day 1 should mostly be the travel activity and maybe just a dinner at the destination.
+                `;
+            } else if (dayNum === duration) {
+                additionalContext = `
+                    Note: This is the last day. The traveler is returning from ${destination} to ${origin}.
+                    Return Detail: Leaving ${destination} at ${initialData.returnInfo.time} via ${initialData.returnInfo.mode}.
+                    CRITICAL: All activities MUST end before the return departure time.
+                `;
+            }
+
+            const dayPrompt = `
+                Provide a detailed daily itinerary for Day ${dayNum} of the trip to ${destination} titled "${initialData.tripTitle}".
+                Origin: ${origin}
+                Interests: ${interests.join(', ')}
+                Budget: ${budget}
+                Primary Transport: ${initialData.travelCost.mode}
+                
+                ${additionalContext}
+
+                This is Day ${dayNum} of a ${duration}-day trip.
+                Ensure context matches previous days if possible (stay consistent with the location).
+                Provide only the daily plan for this specific day based on the specified JSON schema.
+            `;
+            return callAI<DayPlan>(dayPrompt, dailyPlanSchema);
+        });
+
+        const batchResults = await Promise.all(batchPromises);
+        completedDays.push(...batchResults);
         fullItinerary.dailyPlans = [...completedDays].sort((a, b) => a.day - b.day);
         yield { ...fullItinerary };
     }

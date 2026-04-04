@@ -127,6 +127,7 @@ const App: React.FC = () => {
       toast.error(errorMessage, { id: toastId });
       setView('form');
       setItinerary(null);
+      navigate('/');
     } finally {
       setIsLoading(false);
     }
