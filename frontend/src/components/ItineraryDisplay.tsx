@@ -487,45 +487,48 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
           </div>
         )}
 
-        {/* Tab Sub-Navigation */}
-        <div className="flex items-center gap-4 mb-10 border-b border-surface-border/50 pb-8 overflow-x-auto scrollbar-hide shrink-0 -mx-4 px-4 sm:mx-0 sm:px-0">
+        {/* Tab Sub-Navigation — grid on narrow screens so all tabs (including Channel) stay visible; long labels were pushed off-screen with overflow-x scroll */}
+        <div className="grid grid-cols-3 gap-2 md:gap-4 mb-10 border-b border-surface-border/50 pb-8 w-full min-w-0 -mx-4 px-4 sm:mx-0 sm:px-0">
           {/* Itinerary Tab */}
           <button
             onClick={() => setActiveTab('itinerary')}
-            className={`flex items-center gap-4 px-6 md:px-8 py-3 md:py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 hover:-translate-y-1 active:scale-95 border shrink-0 relative z-10 ${
+            className={`flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-3 md:gap-4 px-2 sm:px-4 md:px-8 py-3 md:py-4 rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-[0.12em] sm:tracking-[0.2em] transition-all duration-300 hover:-translate-y-0.5 sm:hover:-translate-y-1 active:scale-95 border min-w-0 relative z-10 ${
               activeTab === 'itinerary' 
                 ? 'bg-brand-primary text-black border-brand-primary shadow-lg shadow-brand-primary/20' 
                 : 'text-text-muted hover:text-brand-primary border-brand-primary/20 hover:border-brand-primary/40 bg-brand-primary/5 hover:bg-brand-primary/10'
             }`}
           >
-            <Layout className={`h-4 w-4 ${activeTab === 'itinerary' ? '' : 'opacity-70'}`} />
-            Itinerary
+            <Layout className={`h-4 w-4 shrink-0 ${activeTab === 'itinerary' ? '' : 'opacity-70'}`} />
+            <span className="text-center leading-tight">Itinerary</span>
           </button>
 
           {/* Expenses Tab (Financial Ledger) */}
           <button
             onClick={() => setActiveTab('expenses')}
-            className={`flex items-center gap-4 px-6 md:px-8 py-3 md:py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 hover:-translate-y-1 active:scale-95 border shrink-0 relative z-10 ${
+            className={`flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-3 md:gap-4 px-2 sm:px-4 md:px-8 py-3 md:py-4 rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-[0.12em] sm:tracking-[0.2em] transition-all duration-300 hover:-translate-y-0.5 sm:hover:-translate-y-1 active:scale-95 border min-w-0 relative z-10 ${
               activeTab === 'expenses' 
                 ? 'bg-brand-tertiary text-white border-brand-tertiary shadow-lg shadow-brand-tertiary/20' 
                 : 'text-brand-tertiary border-brand-tertiary/20 hover:border-brand-tertiary/40 bg-brand-tertiary/5 hover:bg-brand-tertiary/10'
             }`}
           >
-            <Receipt className={`h-4 w-4 ${activeTab === 'expenses' ? '' : 'opacity-80'}`} />
-            Financial Ledger
+            <Receipt className={`h-4 w-4 shrink-0 ${activeTab === 'expenses' ? '' : 'opacity-80'}`} />
+            <span className="text-center leading-tight">
+              <span className="md:hidden">Ledger</span>
+              <span className="hidden md:inline">Financial Ledger</span>
+            </span>
           </button>
 
           {/* Chat Tab */}
           <button
             onClick={() => setActiveTab('chat')}
-            className={`flex items-center gap-4 px-6 md:px-8 py-3 md:py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 hover:-translate-y-1 active:scale-95 border shrink-0 relative z-10 ${
+            className={`flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-3 md:gap-4 px-2 sm:px-4 md:px-8 py-3 md:py-4 rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-[0.12em] sm:tracking-[0.2em] transition-all duration-300 hover:-translate-y-0.5 sm:hover:-translate-y-1 active:scale-95 border min-w-0 relative z-10 ${
               activeTab === 'chat' 
                 ? 'bg-blue-500 text-white border-blue-500 shadow-lg shadow-blue-500/20' 
                 : 'text-blue-500 border-blue-500/20 hover:border-blue-500/40 bg-blue-500/5 hover:bg-blue-500/10'
             }`}
           >
-            <MessageSquare className={`h-4 w-4 ${activeTab === 'chat' ? '' : 'opacity-80'}`} />
-            Channel
+            <MessageSquare className={`h-4 w-4 shrink-0 ${activeTab === 'chat' ? '' : 'opacity-80'}`} />
+            <span className="text-center leading-tight">Channel</span>
           </button>
         </div>
 
