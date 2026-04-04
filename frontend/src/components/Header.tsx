@@ -19,22 +19,25 @@ const Header: React.FC<HeaderProps> = ({ onGoHome, localization }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // Close menu and handle scroll locking
+  // Close menu and handle scroll locking (html + body avoids iOS scroll/click quirks)
   React.useEffect(() => {
     if (isMobileMenuOpen) {
+      document.documentElement.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
     } else {
+      document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
     }
-    
+
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
         setIsMobileMenuOpen(false);
       }
     };
-    
+
     window.addEventListener('resize', handleResize);
     return () => {
+      document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
       window.removeEventListener('resize', handleResize);
     };
@@ -127,34 +130,35 @@ const Header: React.FC<HeaderProps> = ({ onGoHome, localization }) => {
             <ThemeToggle />
           </div>
 
-          <button 
+          <button
+            type="button"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="lg:hidden relative z-[110] w-10 h-10 md:w-12 md:h-12 rounded-2xl glass-panel flex items-center justify-center hover:bg-brand-primary/10 transition-all border-surface-border active:scale-95"
             aria-label="Toggle Menu"
+            aria-expanded={isMobileMenuOpen}
           >
             {isMobileMenuOpen ? <X className="h-5 w-5 md:h-6 md:w-6 text-brand-primary" /> : <Menu className="h-5 w-5 md:h-6 md:w-6 text-text-main" />}
           </button>
         </div>
       </header>
 
-      {/* Mobile Menu Overlay */}
-      <div 
-        className={`fixed inset-0 z-[60] lg:hidden pointer-events-none transition-all duration-500 ${
-          isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0'
+      {/* Mobile menu: z-90 sits above page content (z-auto) but below this header (z-100) so the bar + hamburger stay interactive */}
+      <div
+        className={`fixed inset-0 z-[90] isolate lg:hidden transition-opacity duration-300 ${
+          isMobileMenuOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
         }`}
+        aria-hidden={!isMobileMenuOpen}
       >
-        {/* Backdrop blur overlay */}
-        <div 
-          className="absolute inset-0 bg-bg-void/40 backdrop-blur-sm" 
+        <div
+          className="absolute inset-0 z-0 bg-bg-void/40 backdrop-blur-sm"
           onClick={() => setIsMobileMenuOpen(false)}
+          aria-hidden
         />
-        
-        {/* Navigation panel */}
-        <div 
-          className={`absolute right-4 top-20 left-4 glass-card p-6 md:p-8 border-surface-border transition-all duration-500 transform ${
-            isMobileMenuOpen ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-10 opacity-0 scale-95'
+
+        <div
+          className={`absolute left-4 right-4 top-[5.5rem] z-10 max-h-[min(70vh,calc(100dvh-7rem))] overflow-y-auto overscroll-contain glass-card border-surface-border p-6 shadow-2xl transition-all duration-300 md:p-8 ${
+            isMobileMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'
           }`}
-          onClick={(e) => e.stopPropagation()}
         >
           <nav className="flex flex-col gap-3">
             {/* User Info in Mobile Menu */}
