@@ -18,6 +18,27 @@ const Header: React.FC<HeaderProps> = ({ onGoHome, localization }) => {
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  // Close menu and handle scroll locking
+  React.useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [isMobileMenuOpen]);
 
   const handleLogout = async () => {
     setShowUserMenu(false);
@@ -31,7 +52,7 @@ const Header: React.FC<HeaderProps> = ({ onGoHome, localization }) => {
 
   return (
     <>
-      <header className="py-6 md:py-10 px-4 sm:px-6 md:px-8 flex items-center justify-between z-50">
+      <header className="sticky top-0 w-full py-4 md:py-6 px-4 sm:px-6 md:px-8 flex items-center justify-between z-[100] backdrop-blur-md bg-bg-void/80 border-b border-surface-border/50">
         <Link 
           to="/" 
           className="flex items-center cursor-pointer group" 
@@ -108,7 +129,8 @@ const Header: React.FC<HeaderProps> = ({ onGoHome, localization }) => {
 
           <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden w-10 h-10 md:w-12 md:h-12 rounded-2xl glass-panel flex items-center justify-center hover:bg-brand-primary/10 transition-all border-surface-border active:scale-95"
+            className="lg:hidden relative z-[110] w-10 h-10 md:w-12 md:h-12 rounded-2xl glass-panel flex items-center justify-center hover:bg-brand-primary/10 transition-all border-surface-border active:scale-95"
+            aria-label="Toggle Menu"
           >
             {isMobileMenuOpen ? <X className="h-5 w-5 md:h-6 md:w-6 text-brand-primary" /> : <Menu className="h-5 w-5 md:h-6 md:w-6 text-text-main" />}
           </button>
@@ -123,15 +145,16 @@ const Header: React.FC<HeaderProps> = ({ onGoHome, localization }) => {
       >
         {/* Backdrop blur overlay */}
         <div 
-          className="absolute inset-0 bg-bg-void/80 backdrop-blur-md" 
+          className="absolute inset-0 bg-bg-void/40 backdrop-blur-sm pointer-events-auto" 
           onClick={() => setIsMobileMenuOpen(false)}
         />
         
         {/* Navigation panel */}
         <div 
-          className={`absolute right-4 top-24 left-4 glass-card p-6 md:p-8 border-surface-border transition-all duration-500 transform ${
+          className={`absolute right-4 top-20 left-4 glass-card p-6 md:p-8 border-surface-border transition-all duration-500 transform pointer-events-auto ${
             isMobileMenuOpen ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-10 opacity-0 scale-95'
           }`}
+          onClick={(e) => e.stopPropagation()}
         >
           <nav className="flex flex-col gap-3">
             {/* User Info in Mobile Menu */}
