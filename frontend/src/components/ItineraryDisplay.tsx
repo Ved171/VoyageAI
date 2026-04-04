@@ -488,7 +488,46 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
         )}
 
         {/* Tab Sub-Navigation */}
-        {/* Tab Sub-Navigation */} <div className="flex flex-wrap gap-4 mb-10 border-b border-surface-border/50 pb-8"> {/* Itinerary Tab */} <button onClick={() => setActiveTab('itinerary')} className={`flex items-center gap-4 px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 hover:-translate-y-1 active:scale-95 border ${activeTab === 'itinerary' ? 'bg-brand-primary text-black border-brand-primary shadow-[0_25px_60px_-15px_rgba(255,145,83,0.45)]' : 'text-text-muted hover:text-brand-primary border-brand-primary/20 hover:border-brand-primary/40 bg-brand-primary/5 hover:bg-brand-primary/10 shadow-[0_20px_40px_-12px_rgba(255,145,83,0.15)] hover:shadow-[0_30px_60px_-12px_rgba(255,145,83,0.25)] hover:ring-2 hover:ring-brand-primary/20'}`} > <Layout className={`h-4 w-4 transition-transform duration-300 ${activeTab === 'itinerary' ? '' : 'opacity-70 group-hover:scale-110'}`} /> Itinerary </button> {/* Expenses Tab (Financial Ledger) */} <button onClick={() => setActiveTab('expenses')} className={`flex items-center gap-4 px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 hover:-translate-y-1 active:scale-95 border ${activeTab === 'expenses' ? 'bg-brand-tertiary text-white dark:text-[#011c12] border-brand-tertiary shadow-[0_25px_60px_-15px_rgba(5,150,105,0.45)] dark:shadow-[0_25px_60px_-15px_rgba(155,255,206,0.35)]' : 'text-brand-tertiary dark:text-brand-tertiary/80 border-brand-tertiary/30 dark:border-brand-tertiary/20 bg-brand-tertiary/5 dark:bg-brand-tertiary/5 hover:bg-brand-tertiary/10 dark:hover:bg-brand-tertiary/10 hover:border-brand-tertiary/50 dark:hover:border-brand-tertiary/40 shadow-[0_20px_40px_-12px_rgba(5,150,105,0.2)] hover:shadow-[0_30px_60px_-12px_rgba(5,150,105,0.35)] hover:ring-2 hover:ring-brand-tertiary/30'}`} > <Receipt className={`h-4 w-4 transition-transform duration-300 ${activeTab === 'expenses' ? '' : 'opacity-80 hover:scale-110'}`} /> Financial Ledger </button> {/* Chat Tab */} <button onClick={() => setActiveTab('chat')} className={`flex items-center gap-4 px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 hover:-translate-y-1 active:scale-95 border ${activeTab === 'chat' ? 'bg-[#3b82f6] text-white border-[#3b82f6] shadow-[0_25px_60px_-15px_rgba(59,130,246,0.45)]' : 'text-blue-500 dark:text-[#3b82f6]/80 border-blue-500/30 dark:border-[#3b82f6]/20 bg-blue-500/5 dark:bg-[#3b82f6]/5 hover:bg-blue-500/10 dark:hover:bg-[#3b82f6]/10 hover:border-blue-500/50 dark:hover:border-[#3b82f6]/40 shadow-[0_20px_40px_-12px_rgba(59,130,246,0.2)] hover:shadow-[0_30px_60px_-12px_rgba(59,130,246,0.35)] hover:ring-2 hover:ring-blue-500/30'}`} > <MessageSquare className={`h-4 w-4 transition-transform duration-300 ${activeTab === 'chat' ? '' : 'opacity-80 hover:scale-110'}`} /> Channel </button> </div>
+        <div className="flex items-center gap-4 mb-10 border-b border-surface-border/50 pb-8 overflow-x-auto scrollbar-hide shrink-0 -mx-4 px-4 sm:mx-0 sm:px-0">
+          {/* Itinerary Tab */}
+          <button
+            onClick={() => setActiveTab('itinerary')}
+            className={`flex items-center gap-4 px-6 md:px-8 py-3 md:py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 hover:-translate-y-1 active:scale-95 border shrink-0 relative z-10 ${
+              activeTab === 'itinerary' 
+                ? 'bg-brand-primary text-black border-brand-primary shadow-lg shadow-brand-primary/20' 
+                : 'text-text-muted hover:text-brand-primary border-brand-primary/20 hover:border-brand-primary/40 bg-brand-primary/5 hover:bg-brand-primary/10'
+            }`}
+          >
+            <Layout className={`h-4 w-4 ${activeTab === 'itinerary' ? '' : 'opacity-70'}`} />
+            Itinerary
+          </button>
+
+          {/* Expenses Tab (Financial Ledger) */}
+          <button
+            onClick={() => setActiveTab('expenses')}
+            className={`flex items-center gap-4 px-6 md:px-8 py-3 md:py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 hover:-translate-y-1 active:scale-95 border shrink-0 relative z-10 ${
+              activeTab === 'expenses' 
+                ? 'bg-brand-tertiary text-white border-brand-tertiary shadow-lg shadow-brand-tertiary/20' 
+                : 'text-brand-tertiary border-brand-tertiary/20 hover:border-brand-tertiary/40 bg-brand-tertiary/5 hover:bg-brand-tertiary/10'
+            }`}
+          >
+            <Receipt className={`h-4 w-4 ${activeTab === 'expenses' ? '' : 'opacity-80'}`} />
+            Financial Ledger
+          </button>
+
+          {/* Chat Tab */}
+          <button
+            onClick={() => setActiveTab('chat')}
+            className={`flex items-center gap-4 px-6 md:px-8 py-3 md:py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 hover:-translate-y-1 active:scale-95 border shrink-0 relative z-10 ${
+              activeTab === 'chat' 
+                ? 'bg-blue-500 text-white border-blue-500 shadow-lg shadow-blue-500/20' 
+                : 'text-blue-500 border-blue-500/20 hover:border-blue-500/40 bg-blue-500/5 hover:bg-blue-500/10'
+            }`}
+          >
+            <MessageSquare className={`h-4 w-4 ${activeTab === 'chat' ? '' : 'opacity-80'}`} />
+            Channel
+          </button>
+        </div>
 
         {activeTab === 'itinerary' ? (
           <>

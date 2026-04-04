@@ -79,7 +79,7 @@ const Header: React.FC<HeaderProps> = ({ onGoHome, localization }) => {
 
         <div className="flex items-center gap-3 md:gap-6">
           {/* Favorites - Hidden on mobile, moved to menu */}
-          <div className="hidden md:flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-2 md:ml-4 lg:ml-8">
             <Link to="/favorites" title="Favorites" className="w-10 h-10 md:w-12 md:h-12 rounded-2xl glass-panel flex items-center justify-center hover:bg-brand-primary/10 transition-all active:scale-90 border-surface-border group">
               <Heart className="h-5 w-5 text-text-muted group-hover:text-brand-secondary transition-colors" />
             </Link>
@@ -145,13 +145,13 @@ const Header: React.FC<HeaderProps> = ({ onGoHome, localization }) => {
       >
         {/* Backdrop blur overlay */}
         <div 
-          className="absolute inset-0 bg-bg-void/40 backdrop-blur-sm pointer-events-auto" 
+          className="absolute inset-0 bg-bg-void/40 backdrop-blur-sm" 
           onClick={() => setIsMobileMenuOpen(false)}
         />
         
         {/* Navigation panel */}
         <div 
-          className={`absolute right-4 top-20 left-4 glass-card p-6 md:p-8 border-surface-border transition-all duration-500 transform pointer-events-auto ${
+          className={`absolute right-4 top-20 left-4 glass-card p-6 md:p-8 border-surface-border transition-all duration-500 transform ${
             isMobileMenuOpen ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-10 opacity-0 scale-95'
           }`}
           onClick={(e) => e.stopPropagation()}
