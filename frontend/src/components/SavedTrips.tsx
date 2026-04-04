@@ -7,6 +7,7 @@ interface SavedTripsProps {
   savedTrips: Itinerary[];
   onLoadTrip: (trip: Itinerary) => void;
   onDeleteTrip: (tripId: string) => void;
+  isLoading?: boolean;
 }
 
 const TripCard: React.FC<{ 
@@ -102,7 +103,7 @@ const TripCard: React.FC<{
   );
 };
 
-const SavedTrips: React.FC<SavedTripsProps> = ({ savedTrips, onLoadTrip, onDeleteTrip }) => {
+const SavedTrips: React.FC<SavedTripsProps> = ({ savedTrips, onLoadTrip, onDeleteTrip, isLoading }) => {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<'all' | 'owned' | 'shared'>('all');
 
@@ -127,54 +128,65 @@ const SavedTrips: React.FC<SavedTripsProps> = ({ savedTrips, onLoadTrip, onDelet
         </div>
       </div>
 
-      {savedTrips.length > 0 && (
-        <div className="flex flex-wrap gap-3 md:gap-4 mb-8">
-          <button
-            onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all ${filter === 'all' ? 'bg-brand-primary text-black' : 'bg-surface-panel text-text-muted hover:text-text-main'}`}
-          >
-            All Trips
-          </button>
-          <button
-            onClick={() => setFilter('owned')}
-            className={`px-4 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all ${filter === 'owned' ? 'bg-brand-primary text-black' : 'bg-surface-panel text-text-muted hover:text-text-main'}`}
-          >
-            Created By Me
-          </button>
-          <button
-            onClick={() => setFilter('shared')}
-            className={`px-4 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all ${filter === 'shared' ? 'bg-brand-primary text-black' : 'bg-surface-panel text-text-muted hover:text-text-main'}`}
-          >
-            Shared With Me
-          </button>
-        </div>
-      )}
-
-      {filteredTrips.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {filteredTrips.map((trip, idx) => (
-            <TripCard 
-              key={trip._id || idx} 
-              trip={trip} 
-              onClick={() => onLoadTrip(trip)} 
-              onDelete={(e) => {
-                e.stopPropagation();
-                if (trip._id) onDeleteTrip(trip._id);
-              }}
-            />
-          ))}
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-24 glass-card bg-brand-primary/5 animate-fadeIn">
+          <div className="w-20 h-20 bg-brand-primary/10 rounded-full flex items-center justify-center mb-6">
+            <MapIcon className="h-10 w-10 text-brand-primary animate-pulse" />
+          </div>
+          <p className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] animate-pulse">Syncing Mission History...</p>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 md:py-40 glass-card">
-          <Bookmark className="h-16 w-16 text-text-muted opacity-20 mb-6" />
-          <p className="text-xl font-bold text-text-muted transition-colors duration-500">No saved trips found.</p>
-          <button 
-            onClick={() => navigate('/')}
-            className="mt-8 text-xs font-black text-brand-primary uppercase tracking-[0.4em] hover:opacity-70 transition-opacity"
-          >
-            Plan Your First Trip
-          </button>
-        </div>
+        <>
+          {savedTrips.length > 0 && (
+            <div className="flex flex-wrap gap-3 md:gap-4 mb-8">
+              <button
+                onClick={() => setFilter('all')}
+                className={`px-4 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all ${filter === 'all' ? 'bg-brand-primary text-black' : 'bg-surface-panel text-text-muted hover:text-text-main'}`}
+              >
+                All Trips
+              </button>
+              <button
+                onClick={() => setFilter('owned')}
+                className={`px-4 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all ${filter === 'owned' ? 'bg-brand-primary text-black' : 'bg-surface-panel text-text-muted hover:text-text-main'}`}
+              >
+                Created By Me
+              </button>
+              <button
+                onClick={() => setFilter('shared')}
+                className={`px-4 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all ${filter === 'shared' ? 'bg-brand-primary text-black' : 'bg-surface-panel text-text-muted hover:text-text-main'}`}
+              >
+                Shared With Me
+              </button>
+            </div>
+          )}
+
+          {filteredTrips.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 grow">
+              {filteredTrips.map((trip, idx) => (
+                <TripCard 
+                  key={trip._id || idx} 
+                  trip={trip} 
+                  onClick={() => onLoadTrip(trip)} 
+                  onDelete={(e) => {
+                    e.stopPropagation();
+                    if (trip._id) onDeleteTrip(trip._id);
+                  }}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-20 md:py-40 glass-card">
+              <Bookmark className="h-16 w-16 text-text-muted opacity-20 mb-6" />
+              <p className="text-xl font-bold text-text-muted transition-colors duration-500">No saved trips found.</p>
+              <button 
+                onClick={() => navigate('/')}
+                className="mt-8 text-xs font-black text-brand-primary uppercase tracking-[0.4em] hover:opacity-70 transition-opacity"
+              >
+                Plan Your First Trip
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart, Search, ArrowRight, Compass, Sparkles } from 'lucide-react';
+import { Heart, Search, ArrowRight, Compass, Sparkles, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 import { apiService } from '../services/apiService';
@@ -64,7 +64,12 @@ const Favorites: React.FC = () => {
         </p>
       </div>
 
-      {favorites.length === 0 ? (
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-24 animate-fadeIn">
+          <Loader2 className="h-12 w-12 text-brand-primary animate-spin mb-4" />
+          <p className="text-text-muted font-bold text-sm uppercase tracking-widest animate-pulse transition-colors duration-500">Retrieving Favorites...</p>
+        </div>
+      ) : favorites.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 glass-card bg-brand-primary/5 border-dashed border-2 animate-fadeInUp">
           <div className="w-20 h-20 bg-brand-secondary/10 rounded-full flex items-center justify-center mb-6">
             <Heart className="h-10 w-10 text-brand-secondary opacity-30" />

@@ -32,8 +32,9 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<AppView>('form');
+  const [isTripsLoading, setIsTripsLoading] = useState<boolean>(true);
   const [savedTrips, setSavedTrips] = useState<Itinerary[]>([]);
-  const [interests, setInterests] = useState<string[]>(['Anime', 'History', 'Street Food']);
+  const [interests, setInterests] = useState<string[]>(['History', 'Nature', 'Street Food']);
   const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; tripId: string | null }>({
     isOpen: false,
     tripId: null
@@ -43,11 +44,14 @@ const App: React.FC = () => {
   // Load saved trips on mount from MongoDB
   const loadTrips = useCallback(async () => {
     if (!isAuthenticated) return;
+    setIsTripsLoading(true);
     try {
       const saved = await apiService.getSavedTrips();
       setSavedTrips(saved);
     } catch (e) {
       console.error("Failed to fetch saved trips from backend:", e);
+    } finally {
+      setIsTripsLoading(false);
     }
   }, [isAuthenticated]);
 
@@ -95,7 +99,7 @@ const App: React.FC = () => {
       for await (const partialItinerary of itineraryGenerator) {
         finalItinerary = partialItinerary;
         setItinerary(partialItinerary);
-        
+
         if (partialItinerary.isComplete) {
           toast.success('Your itinerary is ready!', { id: toastId });
         }
@@ -140,7 +144,7 @@ const App: React.FC = () => {
 
   const handleConfirmDelete = async () => {
     if (!deleteConfirm.tripId) return;
-    
+
     try {
       await apiService.deleteItinerary(deleteConfirm.tripId);
       setSavedTrips(prev => prev.filter(t => t._id !== deleteConfirm.tripId));
@@ -183,78 +187,79 @@ const App: React.FC = () => {
   return (
     <>
       <Routes>
-      {/* Public Auth Routes - No Header/Footer */}
-      <Route path="/login" element={
-        isAuthenticated ? <Navigate to="/" replace /> : <AuthPage initialMode="login" />
-      } />
-      <Route path="/signup" element={
-        isAuthenticated ? <Navigate to="/" replace /> : <AuthPage initialMode="signup" />
-      } />
-
-      {/* Protected Main Layout for all other pages */}
-      <Route element={<ProtectedRoute />}>
-        <Route element={
-          <div className="min-h-screen min-h-dvh flex flex-col font-sans relative overflow-x-hidden bg-bg-void transition-colors duration-500 w-full max-w-full">
-            <div className="app-container max-w-7xl mx-auto flex flex-col w-full min-w-0 max-w-full">
-              <Header onGoHome={handleCreateNewTrip} localization={itinerary?.localization || null} />
-              <main className="flex-grow relative py-6 md:py-10 px-4 sm:px-6 md:px-8 min-w-0 w-full max-w-full">
-                <Outlet />
-              </main>
-            </div>
-            <Footer />
-          </div>
-        }>
-        {/* Protected Core Routes */}
-        <Route path="/" element={
-          <div className="flex flex-col items-center">
-            <div className="w-full max-w-5xl py-12">
-              <Hero savedTrips={savedTrips} onLoadTrip={handleLoadTrip} />
-              <PlannerForm 
-                onPlanTrip={handlePlanTrip} 
-                error={error} 
-                isLoading={isLoading}
-                externalInterests={interests}
-                onInterestToggle={handleInterestToggle}
-              />
-            </div>
-          </div>
+        {/* Public Auth Routes - No Header/Footer */}
+        <Route path="/login" element={
+          isAuthenticated ? <Navigate to="/" replace /> : <AuthPage initialMode="login" />
+        } />
+        <Route path="/signup" element={
+          isAuthenticated ? <Navigate to="/" replace /> : <AuthPage initialMode="signup" />
         } />
 
-        {/* Other Routes */}
-        <Route path="/saved-trips" element={
-          view === 'itinerary' && itinerary ? (
-            <div className="max-w-7xl mx-auto py-16">
-              <ItineraryDisplay 
-                itinerary={itinerary} 
-                onCreateNewTrip={handleCreateNewTrip}
-                isLoading={isLoading}
-              />
+        {/* Protected Main Layout for all other pages */}
+        <Route element={<ProtectedRoute />}>
+          <Route element={
+            <div className="min-h-screen min-h-dvh flex flex-col font-sans relative overflow-x-hidden bg-bg-void transition-colors duration-500 w-full max-w-full">
+              <div className="app-container max-w-7xl mx-auto flex flex-col w-full min-w-0 max-w-full">
+                <Header onGoHome={handleCreateNewTrip} localization={itinerary?.localization || null} />
+                <main className="flex-grow relative py-6 md:py-10 px-4 sm:px-6 md:px-8 min-w-0 w-full max-w-full">
+                  <Outlet />
+                </main>
+              </div>
+              <Footer />
             </div>
-          ) : (
-            <SavedTrips 
-              savedTrips={savedTrips} 
-              onLoadTrip={handleLoadTrip} 
-              onDeleteTrip={handleDeleteTripRequest}
-            />
-          )
-        } />
-        <Route path="/destinations" element={<Destinations />} />
-        <Route path="/favorites" element={<Favorites />} />
-      </Route>
-    </Route>
+          }>
+            {/* Protected Core Routes */}
+            <Route path="/" element={
+              <div className="flex flex-col items-center">
+                <div className="w-full max-w-5xl py-12">
+                  <Hero savedTrips={savedTrips} onLoadTrip={handleLoadTrip} />
+                  <PlannerForm
+                    onPlanTrip={handlePlanTrip}
+                    error={error}
+                    isLoading={isLoading}
+                    externalInterests={interests}
+                    onInterestToggle={handleInterestToggle}
+                  />
+                </div>
+              </div>
+            } />
 
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+            {/* Other Routes */}
+            <Route path="/saved-trips" element={
+              view === 'itinerary' && itinerary ? (
+                <div className="max-w-7xl mx-auto py-16">
+                  <ItineraryDisplay
+                    itinerary={itinerary}
+                    onCreateNewTrip={handleCreateNewTrip}
+                    isLoading={isLoading}
+                  />
+                </div>
+              ) : (
+                <SavedTrips
+                  savedTrips={savedTrips}
+                  onLoadTrip={handleLoadTrip}
+                  onDeleteTrip={handleDeleteTripRequest}
+                  isLoading={isTripsLoading}
+                />
+              )
+            } />
+            <Route path="/destinations" element={<Destinations />} />
+            <Route path="/favorites" element={<Favorites />} />
+          </Route>
+        </Route>
 
-    <ConfirmationModal
-      isOpen={deleteConfirm.isOpen}
-      title="Purge Expedition Log"
-      message="Are you sure you want to delete this trip permanently? This action is irreversible and will remove all mission data from the archives."
-      confirmLabel="Purge Archive"
-      onConfirm={handleConfirmDelete}
-      onCancel={() => setDeleteConfirm({ isOpen: false, tripId: null })}
-      variant="danger"
-    />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+
+      <ConfirmationModal
+        isOpen={deleteConfirm.isOpen}
+        title="Purge Expedition Log"
+        message="Are you sure you want to delete this trip permanently? This action is irreversible and will remove all mission data from the archives."
+        confirmLabel="Purge Archive"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteConfirm({ isOpen: false, tripId: null })}
+        variant="danger"
+      />
     </>
   );
 };
