@@ -85,30 +85,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // To prevent concurrent refreshes from overlapping
+  const refreshPromiseRef = React.useRef<Promise<string | null> | null>(null);
 
   /**
    * Refresh access token using httpOnly cookie. Does NOT clear user/session on failure —
    * clearing only happens when the access token is expired and refresh failed (see getAccessToken / init).
    */
   const silentRefresh = useCallback(async (): Promise<string | null> => {
-    try {
-      const res = await fetch(`${BASE_URL}/api/auth/refresh`, {
-        method: 'POST',
-        ...authFetchInit,
-      });
+    // If a refresh is already in progress, return the existing promise
+    if (refreshPromiseRef.current) return refreshPromiseRef.current;
 
-      if (!res.ok) return null;
+    refreshPromiseRef.current = (async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/api/auth/refresh`, {
+          method: 'POST',
+          ...authFetchInit,
+        });
 
-      const data = await res.json();
-      if (!data?.accessToken) return null;
+        if (!res.ok) {
+          if (res.status === 403) console.warn('Refresh token rejected by server (403)');
+          return null;
+        }
 
-      setUser(data.user);
-      setAccessToken(data.accessToken);
-      persistAccessToken(data.accessToken);
-      return data.accessToken;
-    } catch {
-      return null;
-    }
+        const data = await res.json();
+        if (!data?.accessToken) return null;
+
+        setUser(data.user);
+        setAccessToken(data.accessToken);
+        persistAccessToken(data.accessToken);
+        return data.accessToken;
+      } catch (err: any) {
+        console.error('Silent refresh failed:', err.message);
+        return null;
+      } finally {
+        refreshPromiseRef.current = null;
+      }
+    })();
+
+    return refreshPromiseRef.current;
   }, []);
 
   const clearSession = useCallback(() => {

@@ -19,6 +19,7 @@ connectDB();
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 const app = express();
+app.set('trust proxy', 1);
 
 // CORS — allow frontend with credentials
 app.use(cors({
@@ -47,8 +48,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/itineraries', itineraryRoutes);
 app.use('/api/destinations', destinationRoutes);
 app.use('/api/favorites', favoritesRoutes);
-app.use('/api/users', userRoutes);
-
 app.use('/api/users', userRoutes);
 
 // Simple socket logic for real-time chat

@@ -1,317 +1,186 @@
 import { Itinerary, TripMemberInfo, UserSearchInfo, Expense, Settlement, BalanceSummary, Message } from '../types';
 
-// If VITE_API_URL is provided (e.g. in production), use it as the base URL.
-// Otherwise, use an empty string for relative paths (as handled by the Vite proxy in development).
-const BASE_URL = import.meta.env.VITE_API_URL || '';
-const API_BASE = `${BASE_URL}/api/itineraries`;
+/**
+ * BASE URL configuration
+ * Removes trailing slashes to prevent issues like //api/favorites
+ */
+const VITE_API_URL = import.meta.env.VITE_API_URL || '';
+const BASE_URL = VITE_API_URL.endsWith('/') ? VITE_API_URL.slice(0, -1) : VITE_API_URL;
 
 // Token management — the access token is stored in memory via the auth context.
-// We accept a getter function so the service can always retrieve the latest token.
 let getTokenFn: ((forceRefresh?: boolean) => Promise<string | null>) | null = null;
 
 export function setTokenGetter(fn: (forceRefresh?: boolean) => Promise<string | null>) {
   getTokenFn = fn;
 }
 
-async function authHeaders(): Promise<HeadersInit> {
-  const headers: HeadersInit = { 'Content-Type': 'application/json' };
-  if (getTokenFn) {
-    const token = await getTokenFn();
-    if (token) {
-      (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+/**
+ * Centralized fetch wrapper that handles:
+ * 1. Attaching Authorization headers (Access Token)
+ * 2. Including credentials (HTTP-only Refresh Cookie)
+ * 3. Detecting 401/403 errors and triggering a refresh
+ * 4. Retrying the original request after a successful refresh
+ */
+async function fetchWithAuth(url: string, init: RequestInit = {}): Promise<any> {
+  const getHeaders = async (tokenOverride?: string | null) => {
+    const headers = new Headers(init.headers || {});
+    // Don't set Content-Type if body is FormData (browser needs to set boundary)
+    if (!(init.body instanceof FormData) && !headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json');
     }
-  }
-  return headers;
-}
 
-async function handleResponse(res: Response) {
-  if (res.status === 401) {
-    if (getTokenFn) {
-      const newToken = await getTokenFn(true);
-      if (newToken) {
-        return null; // Signals the caller to retry the request
-      }
+    const token = tokenOverride !== undefined ? tokenOverride : (getTokenFn ? await getTokenFn() : null);
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
     }
-    throw new Error('Session expired. Please sign in again.');
+    return headers;
+  };
+
+  const fullUrl = url.startsWith('http') ? url : `${BASE_URL}${url}`;
+  
+  // 1. Initial attempt
+  let response = await fetch(fullUrl, {
+    ...init,
+    headers: await getHeaders(),
+    credentials: 'include',
+  });
+
+  // 2. Handle 401 Unauthorized or 403 Forbidden (Token expired or invalid)
+  if ((response.status === 401 || response.status === 403) && getTokenFn) {
+    console.warn(`Auth failed (${response.status}). Triggering refresh for:`, url);
+    const newToken = await getTokenFn(true); // Force refresh
+    
+    if (newToken) {
+      // 3. Retry with new token
+      response = await fetch(fullUrl, {
+        ...init,
+        headers: await getHeaders(newToken),
+        credentials: 'include',
+      });
+    } else {
+      throw new Error('Session expired. Please sign in again.');
+    }
   }
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({ message: 'Request failed' }));
-    throw new Error(data.message || 'Request failed');
+
+  // 4. Handle other errors
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({ message: `Request failed with status ${response.status}` }));
+    throw new Error(data.message || data.error || 'Request failed');
   }
-  return res.json();
+
+  // Support empty responses or JSON
+  if (response.status === 204) return null;
+  return response.json();
 }
 
 export const apiService = {
-  async getSavedTrips(): Promise<Itinerary[]> {
-    const response = await fetch(API_BASE, {
-      headers: await authHeaders(),
-      credentials: 'include',
-    });
-    const data = await handleResponse(response);
-    if (data === null) {
-      // Retry after refresh
-      const retryRes = await fetch(API_BASE, {
-        headers: await authHeaders(),
-        credentials: 'include',
-      });
-      return retryRes.json();
-    }
-    return data;
+  // Itineraries
+  getSavedTrips(): Promise<Itinerary[]> {
+    return fetchWithAuth('/api/itineraries');
   },
 
-  async saveItinerary(itinerary: Itinerary): Promise<Itinerary> {
-    const response = await fetch(API_BASE, {
+  saveItinerary(itinerary: Itinerary): Promise<Itinerary> {
+    return fetchWithAuth('/api/itineraries', {
       method: 'POST',
-      headers: await authHeaders(),
-      credentials: 'include',
       body: JSON.stringify(itinerary),
     });
-    const data = await handleResponse(response);
-    if (data === null) {
-      const retryRes = await fetch(API_BASE, {
-        method: 'POST',
-        headers: await authHeaders(),
-        credentials: 'include',
-        body: JSON.stringify(itinerary),
-      });
-      return retryRes.json();
-    }
-    return data;
   },
 
-  async deleteItinerary(id: string): Promise<void> {
-    const response = await fetch(`${API_BASE}/${id}`, {
+  deleteItinerary(id: string): Promise<void> {
+    return fetchWithAuth(`/api/itineraries/${id}`, {
       method: 'DELETE',
-      headers: await authHeaders(),
-      credentials: 'include',
     });
-    const data = await handleResponse(response);
-    if (data === null) {
-      await fetch(`${API_BASE}/${id}`, {
-        method: 'DELETE',
-        headers: await authHeaders(),
-        credentials: 'include',
-      });
-    }
   },
 
-  async getFavorites(): Promise<any[]> {
-    const response = await fetch(`${BASE_URL}/api/favorites`, {
-      headers: await authHeaders(),
-      credentials: 'include',
+  updateItinerary(id: string, itinerary: Partial<Itinerary>): Promise<Itinerary> {
+    return fetchWithAuth(`/api/itineraries/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(itinerary),
     });
-    const data = await handleResponse(response);
-    if (data === null) {
-      const retryRes = await fetch(`${BASE_URL}/api/favorites`, {
-        headers: await authHeaders(),
-        credentials: 'include',
-      });
-      return retryRes.json();
-    }
-    return data;
   },
 
-  async addFavorite(destination: any): Promise<any[]> {
-    const response = await fetch(`${BASE_URL}/api/favorites`, {
+  // Favorites
+  getFavorites(): Promise<any[]> {
+    return fetchWithAuth('/api/favorites');
+  },
+
+  addFavorite(destination: any): Promise<any[]> {
+    return fetchWithAuth('/api/favorites', {
       method: 'POST',
-      headers: await authHeaders(),
-      credentials: 'include',
       body: JSON.stringify(destination),
     });
-    const data = await handleResponse(response);
-    if (data === null) {
-      const retryRes = await fetch(`${BASE_URL}/api/favorites`, {
-        method: 'POST',
-        headers: await authHeaders(),
-        credentials: 'include',
-        body: JSON.stringify(destination),
-      });
-      return retryRes.json();
-    }
-    return data;
   },
 
-  async removeFavorite(name: string): Promise<any[]> {
-    const response = await fetch(`${BASE_URL}/api/favorites/${encodeURIComponent(name)}`, {
+  removeFavorite(name: string): Promise<any[]> {
+    return fetchWithAuth(`/api/favorites/${encodeURIComponent(name)}`, {
       method: 'DELETE',
-      headers: await authHeaders(),
-      credentials: 'include',
     });
-    const data = await handleResponse(response);
-    if (data === null) {
-      const retryRes = await fetch(`${BASE_URL}/api/favorites/${encodeURIComponent(name)}`, {
-        method: 'DELETE',
-        headers: await authHeaders(),
-        credentials: 'include',
-      });
-      return retryRes.json();
-    }
-    return data;
   },
 
-  // Collaborative features
-  async updateItinerary(id: string, itinerary: Partial<Itinerary>): Promise<Itinerary> {
-    const response = await fetch(`${API_BASE}/${id}`, {
-      method: 'PUT',
-      headers: await authHeaders(),
-      credentials: 'include',
-      body: JSON.stringify(itinerary),
-    });
-    const data = await handleResponse(response);
-    if (data === null) {
-      const retryRes = await fetch(`${API_BASE}/${id}`, {
-        method: 'PUT',
-        headers: await authHeaders(),
-        credentials: 'include',
-        body: JSON.stringify(itinerary),
-      });
-      return retryRes.json();
-    }
-    return data;
+  // Collaboration
+  getTripMembers(id: string): Promise<TripMemberInfo[]> {
+    return fetchWithAuth(`/api/itineraries/${id}/members`);
   },
 
-  async getTripMembers(id: string): Promise<TripMemberInfo[]> {
-    const response = await fetch(`${API_BASE}/${id}/members`, {
-      headers: await authHeaders(),
-      credentials: 'include',
-    });
-    const data = await handleResponse(response);
-    if (data === null) {
-      const retryRes = await fetch(`${API_BASE}/${id}/members`, {
-        headers: await authHeaders(),
-        credentials: 'include',
-      });
-      return retryRes.json();
-    }
-    return data;
-  },
-
-  async addTripMember(id: string, targetUserId: string, role: string = 'member'): Promise<TripMemberInfo> {
-    const response = await fetch(`${API_BASE}/${id}/members`, {
+  addTripMember(id: string, targetUserId: string, role: string = 'member'): Promise<TripMemberInfo> {
+    return fetchWithAuth(`/api/itineraries/${id}/members`, {
       method: 'POST',
-      headers: await authHeaders(),
-      credentials: 'include',
       body: JSON.stringify({ targetUserId, role }),
     });
-    const data = await handleResponse(response);
-    if (data === null) {
-      const retryRes = await fetch(`${API_BASE}/${id}/members`, {
-        method: 'POST',
-        headers: await authHeaders(),
-        credentials: 'include',
-        body: JSON.stringify({ targetUserId, role }),
-      });
-      return retryRes.json();
-    }
-    return data;
   },
 
-  async leaveTrip(id: string, userId: string = 'me'): Promise<void> {
-    const response = await fetch(`${API_BASE}/${id}/members/${userId}`, {
+  leaveTrip(id: string, userId: string = 'me'): Promise<void> {
+    return fetchWithAuth(`/api/itineraries/${id}/members/${userId}`, {
       method: 'DELETE',
-      headers: await authHeaders(),
-      credentials: 'include',
     });
-    const data = await handleResponse(response);
-    if (data === null) {
-      await fetch(`${API_BASE}/${id}/members/${userId}`, {
-        method: 'DELETE',
-        headers: await authHeaders(),
-        credentials: 'include',
-      });
-    }
   },
 
-  async searchUsers(query: string): Promise<UserSearchInfo[]> {
-    const response = await fetch(`${BASE_URL}/api/users/search?q=${encodeURIComponent(query)}`, {
-      headers: await authHeaders(),
-      credentials: 'include',
-    });
-    const data = await handleResponse(response);
-    if (data === null) {
-      const retryRes = await fetch(`${BASE_URL}/api/users/search?q=${encodeURIComponent(query)}`, {
-        headers: await authHeaders(),
-        credentials: 'include',
-      });
-      return retryRes.json();
-    }
-    return data;
+  searchUsers(query: string): Promise<UserSearchInfo[]> {
+    return fetchWithAuth(`/api/users/search?q=${encodeURIComponent(query)}`);
   },
 
-  // --- Expenses & Settlements ---
-  async getExpenses(tripId: string): Promise<Expense[]> {
-    const response = await fetch(`${API_BASE}/${tripId}/expenses`, {
-      headers: await authHeaders(),
-      credentials: 'include',
-    });
-    return handleResponse(response);
+  // Expenses & Settlements
+  getExpenses(tripId: string): Promise<Expense[]> {
+    return fetchWithAuth(`/api/itineraries/${tripId}/expenses`);
   },
 
-  async addExpense(tripId: string, expense: any): Promise<Expense> {
-    const response = await fetch(`${API_BASE}/${tripId}/expenses`, {
+  addExpense(tripId: string, expense: any): Promise<Expense> {
+    return fetchWithAuth(`/api/itineraries/${tripId}/expenses`, {
       method: 'POST',
-      headers: await authHeaders(),
-      credentials: 'include',
       body: JSON.stringify(expense),
     });
-    return handleResponse(response);
   },
 
-  async deleteExpense(tripId: string, expenseId: string): Promise<void> {
-    const response = await fetch(`${API_BASE}/${tripId}/expenses/${expenseId}`, {
+  deleteExpense(tripId: string, expenseId: string): Promise<void> {
+    return fetchWithAuth(`/api/itineraries/${tripId}/expenses/${expenseId}`, {
       method: 'DELETE',
-      headers: await authHeaders(),
-      credentials: 'include',
     });
-    await handleResponse(response);
   },
 
-  async getSettlements(tripId: string): Promise<Settlement[]> {
-    const response = await fetch(`${API_BASE}/${tripId}/settlements`, {
-      headers: await authHeaders(),
-      credentials: 'include',
-    });
-    return handleResponse(response);
+  getSettlements(tripId: string): Promise<Settlement[]> {
+    return fetchWithAuth(`/api/itineraries/${tripId}/settlements`);
   },
 
-  async addSettlement(tripId: string, settlement: any): Promise<Settlement> {
-    const response = await fetch(`${API_BASE}/${tripId}/settlements`, {
+  addSettlement(tripId: string, settlement: any): Promise<Settlement> {
+    return fetchWithAuth(`/api/itineraries/${tripId}/settlements`, {
       method: 'POST',
-      headers: await authHeaders(),
-      credentials: 'include',
       body: JSON.stringify(settlement),
     });
-    return handleResponse(response);
   },
 
-  async getBalanceSummary(tripId: string): Promise<BalanceSummary> {
-    const response = await fetch(`${API_BASE}/${tripId}/expenses/summary`, {
-      headers: await authHeaders(),
-      credentials: 'include',
-    });
-    return handleResponse(response);
+  getBalanceSummary(tripId: string): Promise<BalanceSummary> {
+    return fetchWithAuth(`/api/itineraries/${tripId}/expenses/summary`);
   },
 
-  // --- Group Chat ---
-  async getTripMessages(tripId: string): Promise<Message[]> {
-    const response = await fetch(`${BASE_URL}/api/itineraries/${tripId}/messages`, {
-      headers: await authHeaders(),
-      credentials: 'include',
-    });
-    return handleResponse(response);
+  // Group Chat
+  getTripMessages(tripId: string): Promise<Message[]> {
+    return fetchWithAuth(`/api/itineraries/${tripId}/messages`);
   },
 
-  async sendTripMessage(tripId: string, formData: FormData): Promise<Message> {
-    const headers = await authHeaders();
-    // Delete Content-Type from headers so the browser sets it correctly for multipart/form-data
-    const { 'Content-Type': _, ...rest } = headers as any;
-    
-    const response = await fetch(`${BASE_URL}/api/itineraries/${tripId}/messages`, {
+  sendTripMessage(tripId: string, formData: FormData): Promise<Message> {
+    return fetchWithAuth(`/api/itineraries/${tripId}/messages`, {
       method: 'POST',
-      headers: rest,
-      credentials: 'include',
       body: formData,
     });
-    return handleResponse(response);
-  }
+  },
 };
