@@ -27,7 +27,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       });
 
       newSocket.on('connect', () => {
-        console.log('⚡ Connected to socket server');
         newSocket.emit('join_user', user._id);
       });
 

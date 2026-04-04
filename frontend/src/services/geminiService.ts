@@ -118,10 +118,6 @@ async function callAI<T>(prompt: string, schema: any): Promise<T> {
         throw new Error("API Key is missing. Please check your environment configuration.");
     }
 
-    // Masked log for debugging
-    const maskedKey = `${apiKey.substring(0, 6)}...${apiKey.substring(apiKey.length - 4)}`;
-    console.log(`[GeminiService] Initializing call with key: ${maskedKey}`);
-
     const genAI = new GoogleGenerativeAI(apiKey);
 
     // Using the canonical SDK with the highly compatible 1.5-flash model
@@ -212,42 +208,44 @@ export async function* generateItinerary(preferences: UserPreferences): AsyncGen
 
     for (let i = 0; i < dayIndices.length; i += BATCH_SIZE) {
         const batch = dayIndices.slice(i, i + BATCH_SIZE);
-        const batchPromises = batch.map(dayNum => {
-            let additionalContext = '';
-            if (dayNum === 1) {
-                additionalContext = `
-                    Note: This is the first day. The traveler is starting from ${origin} and arriving at ${destination}.
-                    Departure Detail: Leaving ${origin} at ${initialData.departureInfo.time} via ${initialData.departureInfo.mode}.
-                    CRITICAL: You MUST consider the travel time from ${origin} to ${destination} using ${initialData.travelCost.mode}.
-                    If travel takes more than 2-3 hours, include "Travel and Arrival" as the first activity of the day with a realistic duration.
-                    Do NOT schedule sightseeing activities before the traveler realistically arrives at the destination.
-                    If travel takes many hours (e.g. driving 10+ hours), Day 1 should mostly be the travel activity and maybe just a dinner at the destination.
-                `;
-            } else if (dayNum === duration) {
-                additionalContext = `
-                    Note: This is the last day. The traveler is returning from ${destination} to ${origin}.
-                    Return Detail: Leaving ${destination} at ${initialData.returnInfo.time} via ${initialData.returnInfo.mode}.
-                    CRITICAL: All activities MUST end before the return departure time.
-                `;
-            }
+        
+        // Build a detailed prompt for this batch
+        const previousDaysSummary = completedDays.length > 0 
+            ? `Already planned: ${completedDays.map(d => `Day ${d.day}: ${d.title}`).join('; ')}. `
+            : '';
 
-            const dayPrompt = `
-                Provide a detailed daily itinerary for Day ${dayNum} of the trip to ${destination} titled "${initialData.tripTitle}".
-                Origin: ${origin}
-                Interests: ${interests.join(', ')}
-                Budget: ${budget}
-                Primary Transport: ${initialData.travelCost.mode}
-                
-                ${additionalContext}
+        const batchPrompt = `
+            You are a master travel curator. Plan Day ${batch[0]} through Day ${batch[batch.length - 1]} of a ${duration}-day trip to ${destination}.
+            Origin: ${origin}
+            Interests: ${interests.join(', ')}
+            Budget Consistency: ${budget}
+            Primary Transport: ${initialData.travelCost.mode}
+            Trip Title: ${initialData.tripTitle}
 
-                This is Day ${dayNum} of a ${duration}-day trip.
-                Ensure context matches previous days if possible (stay consistent with the location).
-                Provide only the daily plan for this specific day based on the specified JSON schema.
-            `;
-            return callAI<DayPlan>(dayPrompt, dailyPlanSchema);
-        });
+            ${batch.includes(1) ? `
+            ARRIVAL DAY (Day 1):
+            Leaves ${origin} at ${initialData.departureInfo.time} via ${initialData.departureInfo.mode}.
+            CRITICAL: Account for travel time accurately. If transit takes more than 3 hours, the first activity MUST be "Arrival and Check-in".
+            ` : ''}
 
-        const batchResults = await Promise.all(batchPromises);
+            ${batch.includes(duration) ? `
+            DEPARTURE DAY (Day ${duration}):
+            Leaves ${destination} at ${initialData.returnInfo.time} via ${initialData.returnInfo.mode}.
+            All activities MUST conclude by then.
+            ` : ''}
+
+            ${previousDaysSummary}
+            
+            INSTRUCTIONS:
+            - Provide unique activities for every single day. 
+            - DO NOT repeat locations or landmarks that were already planned.
+            - Ensure a mix of ${interests.join(', ')} as requested.
+            - Provide ONLY the detailed JSON object for these specific days (${batch.join(', ')}).
+        `;
+
+        const batchResponse = await callAI<{ dailyPlans: DayPlan[] }>(batchPrompt, allDailyPlansSchema);
+        const batchResults = batchResponse.dailyPlans;
+
         completedDays.push(...batchResults);
         fullItinerary.dailyPlans = [...completedDays].sort((a, b) => a.day - b.day);
         yield { ...fullItinerary };

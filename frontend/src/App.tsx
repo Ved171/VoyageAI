@@ -59,7 +59,6 @@ const App: React.FC = () => {
   useEffect(() => {
     if (socket) {
       socket.on('trip_added', (data) => {
-        console.log('📡 AI-Update: New Mission Assigned', data);
         toast.success('You have been added to a new mission!');
         loadTrips();
       });
@@ -196,9 +195,9 @@ const App: React.FC = () => {
       <Route element={<ProtectedRoute />}>
         <Route element={
           <div className="min-h-screen min-h-dvh flex flex-col font-sans relative overflow-x-hidden bg-bg-void transition-colors duration-500 w-full max-w-full">
-            <div className="app-container max-w-7xl mx-auto flex flex-col w-full min-w-0 max-w-full px-4 sm:px-6 md:px-8">
+            <div className="app-container max-w-7xl mx-auto flex flex-col w-full min-w-0 max-w-full">
               <Header onGoHome={handleCreateNewTrip} localization={itinerary?.localization || null} />
-              <main className="flex-grow relative py-6 md:py-10 min-w-0 w-full max-w-full">
+              <main className="flex-grow relative py-6 md:py-10 px-4 sm:px-6 md:px-8 min-w-0 w-full max-w-full">
                 <Outlet />
               </main>
             </div>

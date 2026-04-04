@@ -50,7 +50,6 @@ async function fetchWithAuth(url: string, init: RequestInit = {}): Promise<any> 
     const newToken = await getTokenFn(true); // Force refresh
     
     if (newToken) {
-      console.log(`Token refresh successful for ${url}, retrying request...`);
       // 3. Retry with new token
       response = await fetch(fullUrl, {
         ...init,

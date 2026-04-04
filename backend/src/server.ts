@@ -52,20 +52,12 @@ app.use('/api/users', userRoutes);
 
 // Simple socket logic for real-time chat
 io.on('connection', (socket) => {
-  console.log('⚡ User connected over WebSocket');
-
   socket.on('join_trip', (tripId) => {
     socket.join(tripId);
-    console.log(`📡 User joined trip room: ${tripId}`);
   });
 
   socket.on('join_user', (userId) => {
     socket.join(`user_${userId}`);
-    console.log(`👤 User joined personal room: user_${userId}`);
-  });
-
-  socket.on('disconnect', () => {
-    console.log('🔌 User disconnected');
   });
 });
 

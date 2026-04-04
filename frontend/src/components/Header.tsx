@@ -65,10 +65,10 @@ const Header: React.FC<HeaderProps> = ({ onGoHome, localization }) => {
             <Rocket className="h-7 w-7 text-void" />
           </div>
           <div className="flex flex-col">
-            <span className="text-3xl font-black tracking-tighter text-text-main leading-none transition-colors duration-500">
+            <span className="text-2xl md:text-3xl font-black tracking-tighter text-text-main leading-none transition-colors duration-500">
               VOYAGE<span className="text-gradient">AI</span>
             </span>
-            <span className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em] mt-1 leading-none transition-colors duration-500">Smart Travel Planner</span>
+            <span className="hidden sm:block text-[10px] font-black text-text-muted uppercase tracking-[0.4em] mt-1 leading-none transition-colors duration-500">Smart Travel Planner</span>
           </div>
         </Link>
 
@@ -80,7 +80,7 @@ const Header: React.FC<HeaderProps> = ({ onGoHome, localization }) => {
           <button onClick={() => setIsAboutModalOpen(true)} className="px-4 xl:px-6 py-2 rounded-full text-[10px] xl:text-xs font-black uppercase tracking-widest text-text-muted hover:text-text-main hover:bg-brand-primary/5 transition-all whitespace-nowrap">About</button>
         </nav>
 
-        <div className="flex items-center gap-3 md:gap-6">
+        <div className="flex items-center gap-2 sm:gap-3 md:gap-6">
           {/* Favorites - Hidden on mobile, moved to menu */}
           <div className="hidden md:flex items-center gap-2 md:ml-4 lg:ml-8">
             <Link to="/favorites" title="Favorites" className="w-10 h-10 md:w-12 md:h-12 rounded-2xl glass-panel flex items-center justify-center hover:bg-brand-primary/10 transition-all active:scale-90 border-surface-border group">
@@ -126,7 +126,7 @@ const Header: React.FC<HeaderProps> = ({ onGoHome, localization }) => {
             )}
           </div>
 
-          <div className="hidden sm:block">
+          <div className="flex items-center">
             <ThemeToggle />
           </div>
 
@@ -204,7 +204,7 @@ const Header: React.FC<HeaderProps> = ({ onGoHome, localization }) => {
             </button>
             <button 
               onClick={handleLogout}
-              className="px-8 py-5 rounded-3xl text-sm font-black uppercase tracking-[0.2em] text-brand-secondary hover:bg-brand-secondary/10 text-left border border-brand-secondary/20 transition-all flex items-center justify-between group"
+              className="px-6 py-4 rounded-3xl text-sm font-black uppercase tracking-[0.15em] text-brand-secondary hover:bg-brand-secondary/10 text-left border border-brand-secondary/20 transition-all flex items-center justify-between group"
             >
               Log Out
               <LogOut className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
