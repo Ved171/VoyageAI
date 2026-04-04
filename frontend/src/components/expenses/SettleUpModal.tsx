@@ -77,6 +77,15 @@ export const SettleUpModal: React.FC<SettleUpModalProps> = ({
       <style>{`
         .settle-modal-solid { background-color: #0f172a; }
         .light .settle-modal-solid { background-color: #ffffff; }
+        .settle-dropdown-panel {
+          background-color: rgba(15, 23, 42, 0.96);
+          border: 1px solid var(--surface-border);
+          box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+        }
+        .light .settle-dropdown-panel {
+          background-color: rgba(255, 255, 255, 0.98);
+          box-shadow: 0 16px 48px rgba(15, 23, 42, 0.12);
+        }
       `}</style>
       <div className="flex max-h-[90vh] w-full max-w-md flex-col overflow-visible rounded-[32px] border border-brand-secondary/20 settle-modal-solid shadow-2xl shadow-brand-secondary/10 animate-scaleIn">
         <div className="p-8 border-b border-surface-border flex items-center justify-between">
@@ -139,7 +148,7 @@ export const SettleUpModal: React.FC<SettleUpModalProps> = ({
                     id="settle-payee-listbox"
                     role="listbox"
                     aria-labelledby="settle-payee-trigger"
-                    className="glass-panel absolute left-0 right-0 z-[1300] mt-2 max-h-52 overflow-y-auto rounded-2xl py-2 shadow-2xl custom-scrollbar"
+                    className="settle-dropdown-panel absolute left-0 right-0 z-[1300] mt-2 max-h-52 overflow-y-auto rounded-2xl py-2 backdrop-blur-sm custom-scrollbar"
                   >
                     {members.map((member) => {
                       const selected = member.userId._id === toUser;
