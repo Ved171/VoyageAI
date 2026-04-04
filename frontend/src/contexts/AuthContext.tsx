@@ -2,6 +2,14 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 
 const BASE_URL = import.meta.env.VITE_API_URL || '';
 
+/** Backup when httpOnly refresh cookie is not sent (common on mobile / cross-origin). */
+const ACCESS_STORAGE_KEY = 'voyageai_access';
+
+const authFetchInit = {
+  credentials: 'include' as RequestCredentials,
+  cache: 'no-store' as RequestCache,
+};
+
 interface User {
   _id: string;
   name: string;
@@ -27,56 +35,161 @@ export const useAuth = () => {
   return context;
 };
 
+function getJwtExp(token: string): number | null {
+  try {
+    const part = token.split('.')[1];
+    if (!part) return null;
+    const base64 = part.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+    const payload = JSON.parse(atob(padded)) as { exp?: number };
+    return typeof payload.exp === 'number' ? payload.exp : null;
+  } catch {
+    return null;
+  }
+}
+
+function looksLikeJwt(token: string): boolean {
+  return token.split('.').length === 3 && token.length > 20;
+}
+
+/** Client-side hint only; server validates on /me and API calls. */
+function isAccessTokenLikelyValid(token: string, skewMs = 60_000): boolean {
+  const exp = getJwtExp(token);
+  if (exp === null) return true;
+  return exp * 1000 > Date.now() - skewMs;
+}
+
+function persistAccessToken(token: string | null) {
+  try {
+    if (token) {
+      sessionStorage.setItem(ACCESS_STORAGE_KEY, token);
+      localStorage.setItem(ACCESS_STORAGE_KEY, token);
+    } else {
+      sessionStorage.removeItem(ACCESS_STORAGE_KEY);
+      localStorage.removeItem(ACCESS_STORAGE_KEY);
+    }
+  } catch {
+    // private mode / quota
+  }
+}
+
+function readStoredAccessToken(): string | null {
+  try {
+    return sessionStorage.getItem(ACCESS_STORAGE_KEY) || localStorage.getItem(ACCESS_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Silent refresh — attempt to get a new access token using the refresh cookie
+  /**
+   * Refresh access token using httpOnly cookie. Does NOT clear user/session on failure —
+   * clearing only happens when the access token is expired and refresh failed (see getAccessToken / init).
+   */
   const silentRefresh = useCallback(async (): Promise<string | null> => {
     try {
       const res = await fetch(`${BASE_URL}/api/auth/refresh`, {
         method: 'POST',
-        credentials: 'include',
+        ...authFetchInit,
       });
 
-      if (!res.ok) {
-        setUser(null);
-        setAccessToken(null);
-        return null;
-      }
+      if (!res.ok) return null;
 
       const data = await res.json();
+      if (!data?.accessToken) return null;
+
       setUser(data.user);
       setAccessToken(data.accessToken);
+      persistAccessToken(data.accessToken);
       return data.accessToken;
     } catch {
-      setUser(null);
-      setAccessToken(null);
       return null;
     }
   }, []);
 
-  // On mount, try to restore session via refresh token
+  const clearSession = useCallback(() => {
+    setUser(null);
+    setAccessToken(null);
+    persistAccessToken(null);
+  }, []);
+
+  const restoreSessionFromStoredAccessToken = useCallback(async (): Promise<boolean> => {
+    const stored = readStoredAccessToken();
+    if (!stored || !looksLikeJwt(stored)) {
+      persistAccessToken(null);
+      return false;
+    }
+
+    try {
+      const res = await fetch(`${BASE_URL}/api/auth/me`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${stored}`,
+        },
+        ...authFetchInit,
+      });
+
+      if (res.status === 401 || res.status === 403) {
+        persistAccessToken(null);
+        return false;
+      }
+
+      if (!res.ok) return false;
+
+      const data = await res.json();
+      if (!data?.user) return false;
+
+      setUser(data.user);
+      setAccessToken(stored);
+      persistAccessToken(stored);
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
   useEffect(() => {
     const initAuth = async () => {
-      await silentRefresh();
+      const fromCookie = await silentRefresh();
+      if (!fromCookie) {
+        const restored = await restoreSessionFromStoredAccessToken();
+        if (!restored) {
+          clearSession();
+        }
+      }
       setIsLoading(false);
     };
     initAuth();
-  }, [silentRefresh]);
+  }, [silentRefresh, restoreSessionFromStoredAccessToken, clearSession]);
 
-  // Get a valid access token (refreshing if needed)
-  const getAccessToken = useCallback(async (forceRefresh = false): Promise<string | null> => {
-    if (accessToken && !forceRefresh) return accessToken;
-    return silentRefresh();
-  }, [accessToken, silentRefresh]);
+  const getAccessToken = useCallback(
+    async (forceRefresh = false): Promise<string | null> => {
+      if (!forceRefresh && accessToken && isAccessTokenLikelyValid(accessToken)) {
+        return accessToken;
+      }
+
+      const refreshed = await silentRefresh();
+      if (refreshed) return refreshed;
+
+      if (accessToken && isAccessTokenLikelyValid(accessToken)) {
+        return accessToken;
+      }
+
+      clearSession();
+      return null;
+    },
+    [accessToken, silentRefresh, clearSession]
+  );
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await fetch(`${BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
+      ...authFetchInit,
       body: JSON.stringify({ email, password }),
     });
 
@@ -85,13 +198,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setUser(data.user);
     setAccessToken(data.accessToken);
+    persistAccessToken(data.accessToken);
   }, []);
 
   const signup = useCallback(async (name: string, email: string, password: string) => {
     const res = await fetch(`${BASE_URL}/api/auth/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
+      ...authFetchInit,
       body: JSON.stringify({ name, email, password }),
     });
 
@@ -100,6 +214,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setUser(data.user);
     setAccessToken(data.accessToken);
+    persistAccessToken(data.accessToken);
   }, []);
 
   const logout = useCallback(async () => {
@@ -108,16 +223,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await fetch(`${BASE_URL}/api/auth/logout`, {
           method: 'POST',
           headers: { Authorization: `Bearer ${accessToken}` },
-          credentials: 'include',
+          ...authFetchInit,
         });
       }
     } catch {
-      // Ignore logout errors
+      // ignore
     } finally {
-      setUser(null);
-      setAccessToken(null);
+      clearSession();
     }
-  }, [accessToken]);
+  }, [accessToken, clearSession]);
 
   return (
     <AuthContext.Provider

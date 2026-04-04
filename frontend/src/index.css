@@ -101,7 +101,16 @@
   animation: scan-line 4s linear infinite;
 }
 
-/* Base Styles */
+/* Base Styles — mobile: prevent iOS “zoomed in” layout & text inflation */
+html {
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+}
+
 body {
   background: var(--bg-gradient);
   background-attachment: fixed;
@@ -110,7 +119,28 @@ body {
   -moz-osx-font-smoothing: grayscale;
   font-family: 'Manrope', sans-serif;
   overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  min-height: 100%;
+  min-height: 100dvh;
   transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  min-height: 100%;
+  min-height: 100dvh;
+}
+
+/* iOS: inputs below 16px can force zoom on focus; keep forms readable without auto-zoom */
+@media (max-width: 640px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
 }
 
 /* Global Interactive Cursors */
@@ -201,6 +231,8 @@ input:disabled {
 .leaflet-container {
   @apply rounded-[32px] border border-surface-border transition-all duration-700;
   background: var(--bg-void) !important;
+  max-width: 100%;
+  width: 100% !important;
 }
 
 /* Remove invert/grayscale as we use dark tiles natively */

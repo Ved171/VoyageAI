@@ -202,11 +202,11 @@ export async function* generateItinerary(preferences: UserPreferences): AsyncGen
     let fullItinerary: Partial<Itinerary> = { ...initialData, dailyPlans: [] };
     yield { ...fullItinerary };
 
-    // --- STAGE 2: Daily Activities (Parallel Generation) ---
+    // --- STAGE 2: Daily activities (all requests start in parallel) ---
     const dayIndices = Array.from({ length: duration }, (_, i) => i + 1);
-    
-    // Create an array of completion promises for each day
-    const dayPromises = dayIndices.map(async (dayNum) => {
+
+    const pending = new Map<number, Promise<DayPlan>>();
+    for (const dayNum of dayIndices) {
         const dayPrompt = `
             Provide a detailed daily itinerary for Day ${dayNum} of the trip to ${destination} titled "${initialData.tripTitle}".
             Interests: ${interests.join(', ')}
@@ -217,19 +217,21 @@ export async function* generateItinerary(preferences: UserPreferences): AsyncGen
             Ensure context matches previous days if possible (stay consistent with the location).
             Provide only the daily plan for this specific day based on the specified JSON schema.
         `;
-        const dayData = await callAI<DayPlan>(dayPrompt, dailyPlanSchema);
-        return dayData;
-    });
+        pending.set(dayNum, callAI<DayPlan>(dayPrompt, dailyPlanSchema));
+    }
 
-    // Track completed days to yield progress
     const completedDays: DayPlan[] = [];
-    
-    // Wait for each promise and yield as they resolve
-    for (const promise of dayPromises) {
-        const dayPlan = await promise;
+
+    // Yield as soon as *any* day finishes — previously we awaited day 1, then 2, … so the UI
+    // stayed on "Planning…" until Day 1 returned even if other days were already done.
+    while (pending.size > 0) {
+        const { dayNum, dayPlan } = await Promise.race(
+            [...pending.entries()].map(([num, prom]) =>
+                prom.then((plan) => ({ dayNum: num, dayPlan: plan }))
+            )
+        );
+        pending.delete(dayNum);
         completedDays.push(dayPlan);
-        
-        // Sort specifically by day number to ensure UI doesn't jump
         fullItinerary.dailyPlans = [...completedDays].sort((a, b) => a.day - b.day);
         yield { ...fullItinerary };
     }

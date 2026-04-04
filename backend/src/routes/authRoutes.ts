@@ -20,15 +20,37 @@ function generateRefreshToken(userId: string): string {
   return jwt.sign({ userId }, secret, { expiresIn: REFRESH_TOKEN_EXPIRY });
 }
 
-function setRefreshCookie(res: Response, token: string): void {
+const REFRESH_COOKIE = 'refreshToken';
+
+function refreshCookieOptions(): {
+  httpOnly: boolean;
+  secure: boolean;
+  sameSite: 'lax' | 'none';
+  maxAge: number;
+  path: string;
+} {
   const isProduction = process.env.NODE_ENV === 'production';
-  
-  res.cookie('refreshToken', token, {
+  return {
     httpOnly: true,
-    secure: isProduction, // Must be true when SameSite is None
-    sameSite: isProduction ? 'none' : 'lax', // Use 'none' for cross-domain production
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    path: '/api/auth',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    // Path '/' so every API request can send the cookie; '/api/auth' alone breaks on some mobile browsers
+    path: '/',
+  };
+}
+
+function setRefreshCookie(res: Response, token: string): void {
+  res.cookie(REFRESH_COOKIE, token, refreshCookieOptions());
+}
+
+function clearRefreshCookie(res: Response): void {
+  const isProduction = process.env.NODE_ENV === 'production';
+  res.clearCookie(REFRESH_COOKIE, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+    path: '/',
   });
 }
 
@@ -125,7 +147,7 @@ router.post('/logout', authenticateToken, async (req: AuthRequest, res: Response
       await User.findByIdAndUpdate(userId, { refreshToken: null });
     }
 
-    res.clearCookie('refreshToken', { path: '/api/auth' });
+    clearRefreshCookie(res);
     res.json({ message: 'Logged out successfully' });
   } catch (error) {
     console.error('Logout error:', error);
@@ -136,7 +158,7 @@ router.post('/logout', authenticateToken, async (req: AuthRequest, res: Response
 // POST /api/auth/refresh
 router.post('/refresh', async (req: Request, res: Response) => {
   try {
-    const token = req.cookies?.refreshToken;
+    const token = req.cookies?.[REFRESH_COOKIE];
 
     if (!token) {
       res.status(401).json({ message: 'Refresh token required' });
@@ -153,14 +175,14 @@ router.post('/refresh', async (req: Request, res: Response) => {
     try {
       decoded = jwt.verify(token, secret) as { userId: string };
     } catch {
-      res.clearCookie('refreshToken', { path: '/api/auth' });
+      clearRefreshCookie(res);
       res.status(403).json({ message: 'Invalid refresh token' });
       return;
     }
 
     const user = await User.findById(decoded.userId);
     if (!user || user.refreshToken !== token) {
-      res.clearCookie('refreshToken', { path: '/api/auth' });
+      clearRefreshCookie(res);
       res.status(403).json({ message: 'Refresh token revoked' });
       return;
     }

@@ -199,10 +199,10 @@ const App: React.FC = () => {
       {/* Protected Main Layout for all other pages */}
       <Route element={<ProtectedRoute />}>
         <Route element={
-          <div className="min-h-screen flex flex-col font-sans relative overflow-x-hidden bg-bg-void transition-colors duration-500">
-            <div className="app-container max-w-7xl mx-auto flex flex-col w-full px-4 sm:px-6 md:px-8">
+          <div className="min-h-screen min-h-dvh flex flex-col font-sans relative overflow-x-hidden bg-bg-void transition-colors duration-500 w-full max-w-full">
+            <div className="app-container max-w-7xl mx-auto flex flex-col w-full min-w-0 max-w-full px-4 sm:px-6 md:px-8">
               <Header onGoHome={handleCreateNewTrip} localization={itinerary?.localization || null} />
-              <main className="flex-grow relative py-6 md:py-10">
+              <main className="flex-grow relative py-6 md:py-10 min-w-0 w-full max-w-full">
                 <Outlet />
               </main>
             </div>
