@@ -126,13 +126,54 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
       toast.error('Location and description are required');
       return;
     }
+    if (!newEvent.time) {
+      toast.error('Time is required');
+      return;
+    }
 
-    // Optimistic Update
     const newItinerary = JSON.parse(JSON.stringify(itinerary));
     if (!newItinerary.dailyPlans[dayIdx].activities) {
       newItinerary.dailyPlans[dayIdx].activities = [];
     }
-    newItinerary.dailyPlans[dayIdx].activities.push({ ...newEvent });
+    
+    const currentActivities = newItinerary.dailyPlans[dayIdx].activities;
+
+    // Check for duplicate location
+    if (currentActivities.some((act: any) => act.location?.trim().toLowerCase() === newEvent.location.trim().toLowerCase())) {
+      toast.error('An event with this location already exists on this day.');
+      return;
+    }
+    
+    // Check for duplicate time
+    if (currentActivities.some((act: any) => act.time?.trim().toLowerCase() === newEvent.time.trim().toLowerCase())) {
+      toast.error('An event at this time already exists on this day.');
+      return;
+    }
+
+    // Add missing required fields for the backend schema
+    currentActivities.push({ 
+      ...newEvent,
+      name: newEvent.location,
+      latitude: 0,
+      longitude: 0,
+      activityType: 'Custom'
+    });
+
+    // Sort activities chronologically
+    const parseTime = (timeStr: string) => {
+      if (!timeStr) return 0;
+      // Handle simple HH:MM AM/PM
+      const match = timeStr.match(/(\d+):?(\d*)\s*(AM|PM|am|pm)/i);
+      if (!match) return 0;
+      let hours = parseInt(match[1]) || 0;
+      const minutes = parseInt(match[2]) || 0;
+      const ampm = (match[3] || '').toUpperCase();
+      if (ampm === 'PM' && hours < 12) hours += 12;
+      if (ampm === 'AM' && hours === 12) hours = 0;
+      return hours * 60 + minutes;
+    };
+
+    currentActivities.sort((a: any, b: any) => parseTime(a.time) - parseTime(b.time));
 
     setItinerary(newItinerary);
     setIsAddingEvent(false);

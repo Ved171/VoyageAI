@@ -128,7 +128,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
     const updatedItinerary = await Itinerary.findByIdAndUpdate(
       req.params.id as string,
       body,
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     if (!updatedItinerary) return res.status(404).json({ message: 'Itinerary not found' });
@@ -217,7 +217,7 @@ router.post('/:id/members', async (req: AuthRequest, res) => {
     const member = await TripMember.findOneAndUpdate(
       { tripId: req.params.id as string, userId: targetUserId as string },
       { role: assignRole },
-      { new: true, upsert: true }
+      { returnDocument: 'after', upsert: true }
     ).populate('userId', 'name email');
 
     // Emit notification to the target user

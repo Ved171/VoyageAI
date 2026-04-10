@@ -35,7 +35,6 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           btn: 'bg-red-500 hover:bg-red-600 shadow-red-500/20'
         };
       case 'warning':
-      case 'warning':
         return {
           icon: 'text-orange-500',
           bg: 'bg-orange-500/10',
@@ -55,14 +54,14 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   const styles = getVariantStyles();
 
   return createPortal(
-    <div className="fixed inset-0 z-[2000] flex items-center justify-center p-6 animate-fadeIn">
-      {/* Clickable Backdrop with strong blur */}
+    <div 
+      className="fixed inset-0 z-[2000] flex items-center justify-center p-6 animate-fadeIn bg-bg-void/80 backdrop-blur-xl"
+      onClick={onCancel}
+    >
       <div 
-        className="fixed inset-0 bg-void/60 transition-all duration-500" 
-        style={{ backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}
-        onClick={onCancel} 
-      />
-      <div className={`w-full max-w-sm glass-card ${styles.border} animate-scaleIn shadow-2xl relative overflow-y-auto max-h-[90vh] group z-10 custom-scrollbar`}>
+        className={`w-full max-w-sm bg-bg-void border ${styles.border} rounded-[32px] animate-scaleIn shadow-2xl relative overflow-y-auto max-h-[90vh] group z-10 scrollbar-hide`}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Background glow base on variant */}
         <div className={`absolute top-0 right-0 w-32 h-32 ${variant === 'danger' ? 'bg-red-500/5' : 'bg-brand-primary/5'} blur-[60px] -translate-y-1/2 translate-x-1/2 pointer-events-none`} />
 

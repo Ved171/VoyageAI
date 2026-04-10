@@ -21,17 +21,18 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Normalize FRONTEND_URL to prevent trailing slash mismatches in CORS origin check
-const normalizedFrontend = (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/$/, '');
+const normalizedFrontend = (process.env.FRONTEND_URL || 'http://localhost:3000').trim().replace(/\/$/, '');
 const allowedOrigins = [normalizedFrontend, 'http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:5173'];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    const frontendUrl = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, '') : null;
+const corsOptions = {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    const frontendUrl = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.trim().replace(/\/$/, '') : null;
     if (
-      !origin || 
+      !origin ||
       (frontendUrl && origin === frontendUrl) ||
-      allowedOrigins.includes(origin) || 
-      origin.endsWith('.vercel.app')
+      allowedOrigins.includes(origin) ||
+      (origin && origin.endsWith('.vercel.app')) ||
+      (origin && origin.endsWith('.onrender.com'))
     ) {
       callback(null, true);
     } else {
@@ -40,26 +41,13 @@ app.use(cors({
     }
   },
   credentials: true,
-}));
+};
+
+app.use(cors(corsOptions));
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-  cors: {
-    origin: (origin, callback) => {
-      const frontendUrl = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, '') : null;
-      if (
-        !origin || 
-        (frontendUrl && origin === frontendUrl) ||
-        allowedOrigins.includes(origin) || 
-        origin.endsWith('.vercel.app')
-      ) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    credentials: true,
-  },
+  cors: corsOptions,
 });
 
 export { io }; // Export for logic usage elsewhere

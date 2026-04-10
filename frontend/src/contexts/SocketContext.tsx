@@ -24,6 +24,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     if (isAuthenticated && user) {
       const newSocket = io(BASE_URL, {
         withCredentials: true,
+        transports: ['websocket'], // Force websocket to bypass Render proxy long-polling 502 issues
       });
 
       newSocket.on('connect', () => {
