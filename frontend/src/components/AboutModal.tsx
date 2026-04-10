@@ -26,13 +26,14 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 bg-bg-void/80 backdrop-blur-xl flex items-center justify-center z-[200] animate-fadeIn p-6 transition-colors duration-500"
+      className="fixed inset-0 z-[200] overflow-y-auto bg-bg-void/80 backdrop-blur-xl transition-colors duration-500 custom-scrollbar"
       onClick={onClose}
     >
-      <div
-        className="glass-card max-w-3xl w-full mx-auto p-6 md:p-12 relative animate-fadeInUp border-surface-border overflow-y-auto max-h-[90vh] custom-scrollbar"
-        onClick={e => e.stopPropagation()}
-      >
+      <div className="min-h-screen py-10 px-4 md:px-8 flex items-center justify-center">
+        <div
+          className="glass-card max-w-3xl w-full mx-auto p-6 md:p-12 relative animate-fadeInUp border-surface-border"
+          onClick={e => e.stopPropagation()}
+        >
         {/* Background Accents */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/10 blur-[100px] -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-tertiary/10 blur-[100px] translate-y-1/2 -translate-x-1/2" />
@@ -97,11 +98,12 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          <div className="p-6 md:p-8 glass-panel border-brand-primary/20 rounded-2xl md:rounded-[32px] bg-brand-primary/5">
-            <p className="text-base md:text-lg font-bold text-text-main italic text-center leading-relaxed transition-colors duration-500">
+          <div className="p-5 md:p-8 glass-panel border-brand-primary/20 rounded-2xl md:rounded-[32px] bg-brand-primary/5 w-full mx-auto relative z-20">
+            <p className="text-sm md:text-lg font-bold text-text-main italic text-center leading-relaxed transition-colors duration-500 break-words whitespace-normal text-balance">
               "We don't just plan trips; we craft the stories that make every journey unforgettable."
             </p>
           </div>
+        </div>
         </div>
       </div>
     </div>,

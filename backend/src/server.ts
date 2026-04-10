@@ -16,21 +16,35 @@ dotenv.config();
 // Connect to Database
 connectDB();
 
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
-
 const app = express();
+// Enable trust proxy for secure cookies on Render/Heroku
 app.set('trust proxy', 1);
 
-// CORS — allow frontend with credentials
+// Normalize FRONTEND_URL to prevent trailing slash mismatches in CORS origin check
+const normalizedFrontend = (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/$/, '');
+const allowedOrigins = [normalizedFrontend, 'http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:5173'];
+
 app.use(cors({
-  origin: FRONTEND_URL,
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: FRONTEND_URL,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+        callback(null, true);
+      } else {
+        callback(null, false);
+      }
+    },
     credentials: true,
   },
 });

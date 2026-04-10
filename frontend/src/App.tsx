@@ -39,6 +39,7 @@ const App: React.FC = () => {
     isOpen: false,
     tripId: null
   });
+  const [isServerAwakening, setIsServerAwakening] = useState<boolean>(false);
   const location = useLocation();
 
   // Load saved trips on mount from MongoDB
@@ -120,7 +121,11 @@ const App: React.FC = () => {
       }
     } catch (err: any) {
       console.error("Itinerary generation failed:", err);
-      const errorMessage = err.message || 'Something went wrong. Please try again.';
+      const isAIUnavailable = err.status === 503 || (err.message && err.message.includes('503'));
+      const errorMessage = isAIUnavailable 
+        ? "AI is busy right now. Please try again in a few seconds." 
+        : (err.message || 'Something went wrong. Please try again.');
+      
       setError(errorMessage);
       toast.error(errorMessage, { id: toastId });
       setView('form');
@@ -170,15 +175,40 @@ const App: React.FC = () => {
     );
   };
 
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (authLoading) {
+      timer = setTimeout(() => {
+        setIsServerAwakening(true);
+      }, 3500); // 3.5s Threshold for cold start detection
+    } else {
+      setIsServerAwakening(false);
+    }
+    return () => clearTimeout(timer);
+  }, [authLoading]);
+
   // Auth loading screen handled in individual routes or at top level if desired
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-bg-void transition-colors duration-500">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 bg-brand-primary/10 rounded-2xl flex items-center justify-center shadow-xl animate-pulse border border-brand-primary/20">
-            <GlobeIcon className="h-8 w-8 text-brand-primary" />
+        <div className="flex flex-col items-center gap-6">
+          <div className="relative">
+            <div className="w-20 h-20 bg-brand-primary/10 rounded-[28px] flex items-center justify-center shadow-2xl animate-pulse border border-brand-primary/20 relative z-10">
+              <GlobeIcon className="h-10 w-10 text-brand-primary" />
+            </div>
+            {/* Orbital Rings for visual depth */}
+            <div className="absolute inset-0 w-20 h-20 border-2 border-brand-primary/20 rounded-[28px] animate-[spin_10s_linear_infinite]" />
+            <div className="absolute inset-0 w-20 h-20 border border-brand-secondary/10 rounded-[28px] animate-[spin_6s_linear_infinite_reverse]" />
           </div>
-          <p className="text-text-muted font-bold text-xs uppercase tracking-widest animate-pulse">Initializing VoyageAI...</p>
+          
+          <div className="text-center space-y-2">
+            <p className="text-text-main font-black text-sm uppercase tracking-[0.4em] animate-pulse">Initializing VoyageAI</p>
+            {isServerAwakening ? (
+              <p className="text-[10px] font-bold text-brand-secondary uppercase tracking-[0.2em] animate-fadeIn">⚠️ Waking up Mission Control (Cold Start)...</p>
+            ) : (
+              <p className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em]">Establishing Secure Link...</p>
+            )}
+          </div>
         </div>
       </div>
     );

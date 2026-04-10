@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Send, 
   Image as ImageIcon, 
@@ -315,21 +316,24 @@ export const TripChat: React.FC<TripChatProps> = ({ tripId, currentUser }) => {
         </form>
       </div>
 
-      {/* Lightbox */}
-      {expandedImage && (
+      {/* Lightbox — Portaled to root to escape parent overflow & filters */}
+      {expandedImage && createPortal(
         <div 
-          className="fixed inset-0 z-[2000] bg-void/90 backdrop-blur-2xl p-10 flex items-center justify-center animate-fadeIn"
+          className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-3xl p-4 md:p-12 flex items-center justify-center animate-fadeIn cursor-zoom-out"
           onClick={() => setExpandedImage(null)}
         >
-          <button className="absolute top-10 right-10 p-4 text-white hover:rotate-90 transition-all">
-             <X className="h-10 w-10" />
+          <button className="absolute top-6 right-6 md:top-10 md:right-10 p-4 text-white hover:rotate-90 transition-all z-[10000]">
+             <X className="h-8 w-8 md:h-10 md:w-10" />
           </button>
-          <img 
-            src={expandedImage} 
-            className="max-h-[90vh] max-w-[90vw] object-contain rounded-3xl animate-scaleIn shadow-2xl"
-            alt="Expanded shared view" 
-          />
-        </div>
+          <div className="relative max-h-[90vh] max-w-[90vw] animate-scaleIn" onClick={(e) => e.stopPropagation()}>
+            <img 
+              src={expandedImage} 
+              className="max-h-[90vh] max-w-[90vw] object-contain rounded-2xl md:rounded-3xl shadow-[0_0_100px_rgba(0,0,0,0.5)] border border-white/10"
+              alt="Expanded mission log view" 
+            />
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );

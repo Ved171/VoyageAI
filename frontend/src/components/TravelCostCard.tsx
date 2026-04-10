@@ -43,7 +43,7 @@ const TravelCostCard: React.FC<TravelCostCardProps> = ({ travelCost }) => {
             </div>
           )}
         </div>
-        <p className="text-[10px] font-black tracking-[0.2em] uppercase text-text-muted">
+        <p className="text-xs font-black tracking-[0.2em] uppercase text-text-muted">
           {title}
         </p>
         
@@ -98,9 +98,9 @@ const TravelCostCard: React.FC<TravelCostCardProps> = ({ travelCost }) => {
             <div className="absolute inset-0 m-auto w-12 h-12 rounded-full bg-brand-primary/10 blur-xl pointer-events-none" />
           </div>
 
-          <div className="grid grid-cols-2 gap-x-6 gap-y-2 mt-4">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-3 mt-4">
             {BUDGET_DATA.map((item, idx) => (
-              <div key={idx} className="flex items-center text-[9px] font-black text-text-muted uppercase tracking-widest">
+              <div key={idx} className="flex items-center text-[11px] font-black text-text-main uppercase tracking-widest">
                 <div className="w-2.5 h-2.5 rounded-full mr-2 shadow-sm" style={{ backgroundColor: item.color, boxShadow: `0 0 8px ${item.color}55` }} />
                 {item.name}
               </div>

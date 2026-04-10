@@ -6,7 +6,7 @@ import { authenticateToken, AuthRequest } from '../middleware/auth.js';
 const router = express.Router();
 
 const ACCESS_TOKEN_EXPIRY = '15m';
-const REFRESH_TOKEN_EXPIRY = '7d';
+const REFRESH_TOKEN_EXPIRY = '30d'; // Increased to 30 days for better UX
 
 function generateAccessToken(userId: string): string {
   const secret = process.env.JWT_ACCESS_SECRET;
@@ -20,7 +20,7 @@ function generateRefreshToken(userId: string): string {
   return jwt.sign({ userId }, secret, { expiresIn: REFRESH_TOKEN_EXPIRY });
 }
 
-const REFRESH_COOKIE = 'refreshToken';
+const REFRESH_COOKIE = 'voyage_refresh_v2'; // Changed to bypass old trapped/sticky cookies
 
 function refreshCookieOptions(): {
   httpOnly: boolean;
@@ -33,8 +33,9 @@ function refreshCookieOptions(): {
   return {
     httpOnly: true,
     secure: isProduction,
-    sameSite: isProduction ? 'none' : 'lax', // Must be none for secure to work in many cross-domain scenarios
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    // CRITICAL: Must be 'none' for Secure to work across domains (Vercel -> Render)
+    sameSite: isProduction ? 'none' : 'lax', 
+    maxAge: 30 * 24 * 60 * 60 * 1000,
     path: '/',
   };
 }
@@ -44,7 +45,7 @@ function setRefreshCookie(res: Response, token: string): void {
 }
 
 function clearRefreshCookie(res: Response): void {
-  const isProduction = process.env.NODE_ENV === 'production';
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
   res.clearCookie(REFRESH_COOKIE, {
     httpOnly: true,
     secure: isProduction,
@@ -174,9 +175,13 @@ router.post('/refresh', async (req: Request, res: Response) => {
     try {
       decoded = jwt.verify(token, secret) as { userId: string };
     } catch (err: any) {
-      console.warn('⚠️ Refresh Token Verification Failed:', err.message);
-      clearRefreshCookie(res);
-      res.status(403).json({ message: 'Invalid refresh token signature' });
+      if (err.name === 'TokenExpiredError') {
+        clearRefreshCookie(res);
+        res.status(403).json({ message: 'Session expired. Please log in again.' });
+      } else {
+        clearRefreshCookie(res);
+        res.status(403).json({ message: 'Invalid session signature.' });
+      }
       return;
     }
 
@@ -195,11 +200,13 @@ router.post('/refresh', async (req: Request, res: Response) => {
       return;
     }
 
-    // Prevent concurrent refresh request race conditions by NOT rotating the refresh 
-    // token on every access token request.
+    // ROTATE the refresh token to extend the session life indefinitely for active users
+    const newRefreshToken = generateRefreshToken(user._id.toString());
     const newAccessToken = generateAccessToken(user._id.toString());
+    user.refreshToken = newRefreshToken;
+    await user.save();
 
-    setRefreshCookie(res, token); // Extend the existing cookie's life
+    setRefreshCookie(res, newRefreshToken);
 
     res.json({
       accessToken: newAccessToken,

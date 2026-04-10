@@ -23,7 +23,10 @@ import {
   Wallet,
   Receipt,
   Layout,
-  MessageSquare
+  MessageSquare,
+  Briefcase,
+  Lightbulb,
+  CloudSun
 } from 'lucide-react';
 import MapView from './MapView';
 import TravelCostCard from './TravelCostCard';
@@ -350,10 +353,10 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
             </button>
 
             <div className="flex flex-wrap items-center gap-3 mb-6">
-              <span className="px-4 py-1.5 rounded-full bg-brand-primary/10 text-brand-primary text-[10px] font-black uppercase tracking-widest border border-brand-primary/20">
+              <span className="px-4 py-1.5 rounded-full bg-brand-primary/10 text-brand-primary text-xs font-black uppercase tracking-widest border border-brand-primary/20">
                 Trip: {itinerary.destination.toUpperCase()}
               </span>
-              <span className="px-4 py-1.5 rounded-full bg-brand-tertiary/10 text-brand-tertiary text-[10px] font-black uppercase tracking-widest border border-brand-tertiary/20">
+              <span className="px-4 py-1.5 rounded-full bg-brand-tertiary/10 text-brand-tertiary text-xs font-black uppercase tracking-widest border border-brand-tertiary/20">
                 Plan Complete ✓
               </span>
             </div>
@@ -388,7 +391,7 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
                   </div>
                   <div>
                     <p className="text-[10px] font-black text-text-muted uppercase tracking-widest leading-none mb-1 transition-colors duration-500">Region</p>
-                    <p className="text-lg font-black text-text-main leading-none transition-colors duration-500">{itinerary.localization?.targetLanguage || 'Global'}</p>
+                    <p className="text-base md:text-lg font-black text-text-main leading-none transition-colors duration-500">{itinerary.localization?.targetLanguage || 'Global'}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 md:gap-4">
@@ -444,44 +447,48 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
           </div>
         </div>
 
-        {/* Mission Logistics Section */}
+        {/* Mission Logistics Section — Refactored for deep responsiveness & high visibility */}
         {itinerary.departureInfo && itinerary.returnInfo && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12 animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
             {/* Departure Leg */}
-            <div className="glass-card p-6 md:p-8 flex items-center gap-6 relative overflow-hidden group border-brand-primary/20">
-              <div className="absolute top-0 left-0 w-1 h-full bg-brand-primary" />
-              <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-brand-primary/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-500 shadow-lg shadow-brand-primary/10">
-                <Plane className="h-6 w-6 md:h-8 md:w-8 text-brand-primary rotate-45" />
+            <div className="glass-card p-6 md:p-8 flex flex-col sm:flex-row items-start sm:items-center gap-6 relative overflow-visible group border-brand-primary/30 min-h-[140px]">
+              <div className="absolute top-0 left-0 w-1.5 h-full bg-brand-primary/60" />
+              <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-brand-primary/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-all duration-500 shadow-xl shadow-brand-primary/5 border border-brand-primary/20">
+                <Plane className="h-7 w-7 md:h-8 md:w-8 text-brand-primary rotate-45" />
               </div>
-              <div className="flex-grow">
-                <p className="text-[10px] font-black text-brand-primary uppercase tracking-[0.4em] mb-2">Outbound Journey</p>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <h3 className="text-lg md:text-xl font-black text-text-main truncate">{itinerary.departureInfo.mode}</h3>
-                  <span className="text-xs md:text-sm font-black text-brand-primary bg-brand-primary/10 px-3 py-1 rounded-lg border border-brand-primary/20">{itinerary.departureInfo.time}</span>
+              <div className="flex-grow min-w-0 w-full">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[11px] font-black text-brand-primary uppercase tracking-[0.3em]">Outbound Journey</p>
+                  <span className="text-xs font-black text-brand-primary bg-brand-primary/10 px-3 py-1 rounded-lg border border-brand-primary/20 whitespace-nowrap">{itinerary.departureInfo.time}</span>
                 </div>
-                <p className="text-xs font-bold text-text-muted uppercase tracking-widest mt-2 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
-                  Departure: {itinerary.departureInfo.location}
-                </p>
+                <h3 className="text-xl md:text-2xl font-black text-text-main leading-tight mb-2 break-words transition-colors group-hover:text-brand-primary">{itinerary.departureInfo.mode}</h3>
+                <div className="flex items-start gap-2">
+                  <div className="w-2 h-2 rounded-full bg-brand-primary shrink-0 mt-1" />
+                  <p className="text-xs font-bold text-text-muted uppercase tracking-wider leading-relaxed">
+                    Departure: <span className="text-text-main">{itinerary.departureInfo.location}</span>
+                  </p>
+                </div>
               </div>
             </div>
 
             {/* Return Leg */}
-            <div className="glass-card p-6 md:p-8 flex items-center gap-6 relative overflow-hidden group border-brand-secondary/20">
-              <div className="absolute top-0 left-0 w-1 h-full bg-brand-secondary" />
-              <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-brand-secondary/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-500 shadow-lg shadow-brand-secondary/10">
-                <Plane className="h-6 w-6 md:h-8 md:w-8 text-brand-secondary -rotate-45" />
+            <div className="glass-card p-6 md:p-8 flex flex-col sm:flex-row items-start sm:items-center gap-6 relative overflow-visible group border-brand-secondary/30 min-h-[140px]">
+              <div className="absolute top-0 left-0 w-1.5 h-full bg-brand-secondary/60" />
+              <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-brand-secondary/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-all duration-500 shadow-xl shadow-brand-secondary/5 border border-brand-secondary/20">
+                <Plane className="h-7 w-7 md:h-8 md:w-8 text-brand-secondary -rotate-45" />
               </div>
-              <div className="flex-grow">
-                <p className="text-[10px] font-black text-brand-secondary uppercase tracking-[0.4em] mb-2">Return Journey</p>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <h3 className="text-lg md:text-xl font-black text-text-main truncate">{itinerary.returnInfo.mode}</h3>
-                  <span className="text-xs md:text-sm font-black text-brand-secondary bg-brand-secondary/10 px-3 py-1 rounded-lg border border-brand-secondary/20">{itinerary.returnInfo.time}</span>
+              <div className="flex-grow min-w-0 w-full">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[11px] font-black text-brand-secondary uppercase tracking-[0.3em]">Return Journey</p>
+                  <span className="text-xs font-black text-brand-secondary bg-brand-secondary/10 px-3 py-1 rounded-lg border border-brand-secondary/20 whitespace-nowrap">{itinerary.returnInfo.time}</span>
                 </div>
-                <p className="text-xs font-bold text-text-muted uppercase tracking-widest mt-2 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-brand-secondary" />
-                  Terminal: {itinerary.returnInfo.location}
-                </p>
+                <h3 className="text-xl md:text-2xl font-black text-text-main leading-tight mb-2 break-words transition-colors group-hover:text-brand-secondary">{itinerary.returnInfo.mode}</h3>
+                <div className="flex items-start gap-2">
+                  <div className="w-2 h-2 rounded-full bg-brand-secondary shrink-0 mt-1" />
+                  <p className="text-xs font-bold text-text-muted uppercase tracking-wider leading-relaxed">
+                    Terminal: <span className="text-text-main">{itinerary.returnInfo.location}</span>
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -613,7 +620,7 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
                                 {activity.location}
                                 <ArrowLeft className="h-4 w-4 rotate-180 opacity-0 group-hover/item:opacity-100 transition-all -translate-x-2 group-hover/item:translate-x-0" />
                               </h3>
-                              <p className="text-text-muted text-sm font-medium leading-relaxed max-w-xl transition-colors duration-500">
+                              <p className="text-text-main text-sm font-bold leading-relaxed max-w-xl">
                                 {activity.description}
                               </p>
 
@@ -764,31 +771,65 @@ const ItineraryDisplay: React.FC<ItineraryDisplayProps> = ({ itinerary: initialI
                 </div>
               )}
 
-              {/* Daily Advice Section - Full Width Split */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
-                <div className="glass-card p-8 border-brand-tertiary/20">
+              {/* Daily Advice & Mission Prep Section — Full Width Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pt-6">
+                
+                {/* Weather Tips Card */}
+                <div className="glass-card p-8 border-brand-tertiary/20 group hover:border-brand-tertiary/40 transition-all">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-xl bg-brand-tertiary/10 flex items-center justify-center">
-                      <Wind className="h-5 w-5 text-brand-tertiary" />
+                    <div className="w-12 h-12 rounded-2xl bg-brand-tertiary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <CloudSun className="h-6 w-6 text-brand-tertiary" />
                     </div>
-                    <h3 className="text-xs font-black text-text-muted uppercase tracking-[0.2em] transition-colors duration-500">Weather Tips</h3>
+                    <div>
+                      <h3 className="text-xs font-black text-text-muted uppercase tracking-[0.2em]">Weather Intel</h3>
+                      <p className="text-[10px] font-bold text-text-muted opacity-60">Atmospheric Conditions</p>
+                    </div>
                   </div>
-                  <p className="text-sm font-medium text-text-muted opacity-80 italic transition-all duration-500">
-                    {itinerary.localization?.targetLanguage && `Local language: ${itinerary.localization.targetLanguage}. `}
-                    Pack comfortable clothes and dress for the weather. Stay hydrated during your trip.
+                  <p className="text-sm font-semibold text-text-main leading-relaxed">
+                    {itinerary.localization?.targetLanguage && `Host Language: ${itinerary.localization.targetLanguage}. `}
+                    Expect varying conditions in {itinerary.destination}. Pack breathable layers and stay prepared for unexpected shifts in weather.
                   </p>
                 </div>
 
-                <div className="glass-card p-8 border-purple-500/20">
+                {/* Local Tips Card */}
+                <div className="glass-card p-8 border-purple-500/20 group hover:border-purple-500/40 transition-all">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
-                      <Compass className="h-5 w-5 text-purple-400" />
+                    <div className="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Lightbulb className="h-6 w-6 text-purple-400" />
                     </div>
-                    <h3 className="text-xs font-black text-text-muted uppercase tracking-[0.2em] transition-colors duration-500">Local Tips</h3>
+                    <div>
+                      <h3 className="text-xs font-black text-text-muted uppercase tracking-[0.2em]">Local Intel</h3>
+                      <p className="text-[10px] font-bold text-text-muted opacity-60">Cultural & Navigation Tips</p>
+                    </div>
                   </div>
-                  <p className="text-sm font-medium text-text-muted opacity-80 transition-all duration-500">
-                    Explore local neighborhoods and hidden gems beyond the tourist spots for a richer cultural experience.
+                  <p className="text-sm font-semibold text-text-main leading-relaxed">
+                    Dive into authentic neighborhoods in {itinerary.destination}. Look for spots where locals congregate to find the best value and most memorable experiences.
                   </p>
+                </div>
+
+                {/* Mission Essentials (Packing List) Card */}
+                <div className="glass-card p-8 border-brand-primary/20 md:col-span-2 xl:col-span-1 group hover:border-brand-primary/40 transition-all">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-12 h-12 rounded-2xl bg-brand-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Briefcase className="h-6 w-6 text-brand-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-black text-text-muted uppercase tracking-[0.2em]">Mission Gear</h3>
+                      <p className="text-[10px] font-bold text-text-muted opacity-60">Essential Packing List</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {itinerary.packingList && itinerary.packingList.length > 0 ? (
+                      itinerary.packingList.map((item, idx) => (
+                        <div key={idx} className="flex items-center gap-2 px-3 py-1.5 rounded-xl glass-panel border-white/10 text-xs font-black text-text-main uppercase tracking-tight">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                          {item}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs font-medium text-text-muted opacity-50 italic">AI core generating inventory list...</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

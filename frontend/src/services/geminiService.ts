@@ -111,6 +111,18 @@ const allDailyPlansSchema = {
 };
 
 
+const callAIWithRetry = async (fn, retries = 3, delay = 1000) => {
+    try {
+        return await fn();
+    } catch (error) {
+        if (error.status === 503 && retries > 0) {
+            await new Promise(resolve => setTimeout(resolve, delay));
+            return callAIWithRetry(fn, retries - 1, delay * 2);
+        }
+        throw error;
+    }
+};
+
 async function callAI<T>(prompt: string, schema: any): Promise<T> {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
@@ -120,9 +132,8 @@ async function callAI<T>(prompt: string, schema: any): Promise<T> {
 
     const genAI = new GoogleGenerativeAI(apiKey);
 
-    // Using the canonical SDK with the highly compatible 1.5-flash model
     const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash",
+        model: "gemini-3-flash-preview",
         generationConfig: {
             responseMimeType: "application/json",
             responseSchema: schema,
@@ -130,24 +141,19 @@ async function callAI<T>(prompt: string, schema: any): Promise<T> {
     });
 
     try {
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const rawText = response.text();
+        const responseData = await callAIWithRetry(async () => {
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            const text = response.text();
+            if (!text) throw new Error("Empty response");
+            return text;
+        });
 
-        if (!rawText) {
-            throw new Error("AI returned an empty response. Please try again.");
-        }
+        const firstIndex = responseData.indexOf('{');
+        const lastIndex = responseData.lastIndexOf('}');
+        if (firstIndex === -1 || lastIndex === -1) throw new Error("Invalid JSON format");
 
-        // Robust JSON extraction to handle any potential pre/post text
-        const firstIndex = rawText.indexOf('{');
-        const lastIndex = rawText.lastIndexOf('}');
-
-        if (firstIndex === -1 || lastIndex === -1) {
-            throw new Error("Invalid response format from AI. Please try again.");
-        }
-
-        const jsonText = rawText.substring(firstIndex, lastIndex + 1);
-        return JSON.parse(jsonText) as T;
+        return JSON.parse(responseData.substring(firstIndex, lastIndex + 1)) as T;
     } catch (error: any) {
         console.error("AI call failed:", error);
         if (error instanceof Error) {
