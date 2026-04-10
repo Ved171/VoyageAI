@@ -26,9 +26,16 @@ const allowedOrigins = [normalizedFrontend, 'http://localhost:3000', 'http://loc
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+    const frontendUrl = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, '') : null;
+    if (
+      !origin || 
+      (frontendUrl && origin === frontendUrl) ||
+      allowedOrigins.includes(origin) || 
+      origin.endsWith('.vercel.app')
+    ) {
       callback(null, true);
     } else {
+      console.error(`CORS Blocked: Origin '${origin}' does not match FRONTEND_URL '${frontendUrl}'`);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -39,10 +46,16 @@ const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      const frontendUrl = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, '') : null;
+      if (
+        !origin || 
+        (frontendUrl && origin === frontendUrl) ||
+        allowedOrigins.includes(origin) || 
+        origin.endsWith('.vercel.app')
+      ) {
         callback(null, true);
       } else {
-        callback(null, false);
+        callback(new Error('Not allowed by CORS'));
       }
     },
     credentials: true,
