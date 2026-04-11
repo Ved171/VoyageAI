@@ -29,7 +29,7 @@ export const TripChat: React.FC<TripChatProps> = ({ tripId, currentUser }) => {
   const [isSending, setIsSending] = useState(false);
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
   
-  const [showScrollBottom, setShowScrollBottom] = useState(false);
+  const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
   
   const socketRef = useRef<Socket | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -59,7 +59,19 @@ export const TripChat: React.FC<TripChatProps> = ({ tripId, currentUser }) => {
     socketRef.current.emit('join_trip', tripId);
 
     socketRef.current.on('message_received', (newMessage: Message) => {
-      setMessages(prev => [...prev, newMessage]);
+      let isNearBottom = true;
+      if (scrollRef.current) {
+        const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+        isNearBottom = scrollHeight - scrollTop - clientHeight < 150;
+      }
+      
+      setMessages(prev => {
+        // If not our message and not at bottom, we have an unread message
+        if (newMessage.userId._id !== currentUser?._id && !isNearBottom) {
+          setHasUnreadMessages(true);
+        }
+        return [...prev, newMessage];
+      });
     });
 
     return () => {
@@ -67,10 +79,14 @@ export const TripChat: React.FC<TripChatProps> = ({ tripId, currentUser }) => {
     };
   }, [tripId]);
 
-  // Auto-scroll on new messages
+  // Auto-scroll logic
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    // Only auto-scroll if we don't have unread messages 
+    // (meaning we were already at the bottom or it's our own message being sent)
+    if (!hasUnreadMessages) {
+      scrollToBottom();
+    }
+  }, [messages, hasUnreadMessages]);
 
   const scrollToBottom = () => {
     if (scrollRef.current) {
@@ -85,7 +101,9 @@ export const TripChat: React.FC<TripChatProps> = ({ tripId, currentUser }) => {
     if (scrollRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
       const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
-      setShowScrollBottom(!isAtBottom);
+      if (isAtBottom && hasUnreadMessages) {
+        setHasUnreadMessages(false);
+      }
     }
   };
 
@@ -134,7 +152,7 @@ export const TripChat: React.FC<TripChatProps> = ({ tripId, currentUser }) => {
   }
 
   return (
-    <div className="flex flex-col h-[85vh] glass-card border-brand-primary/20 overflow-hidden relative group shadow-2xl">
+    <div className="flex flex-col h-[93vh] glass-card border-brand-primary/20 overflow-hidden relative group shadow-2xl">
       {/* Background Glow */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/5 blur-[100px] -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
@@ -237,9 +255,12 @@ export const TripChat: React.FC<TripChatProps> = ({ tripId, currentUser }) => {
         <div ref={lastMessageRef} />
 
         {/* Scroll to Bottom Button */}
-        {showScrollBottom && (
+        {hasUnreadMessages && (
           <button 
-            onClick={scrollToBottom}
+            onClick={() => {
+              setHasUnreadMessages(false);
+              scrollToBottom();
+            }}
             className="fixed bottom-32 right-12 z-50 w-12 h-12 rounded-full bg-brand-primary text-void shadow-2xl flex items-center justify-center animate-bounce transition-all hover:scale-110 active:scale-95"
           >
             <Clock className="h-5 w-5 rotate-180" />
